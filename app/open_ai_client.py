@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 
 import openai
 from openai.openai_object import OpenAIObject
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 openai.api_key = CONFIG['OPENAI_KEY']
 
 
-async def create_message(system_prompt, history):
+def create_message(system_prompt, history):
     history = history or []
     messages = [{"role": "system", "content": system_prompt}] + history
     for i in range(0, 3):
@@ -19,4 +20,4 @@ async def create_message(system_prompt, history):
             return response['choices'][0]['message']['content']
         except (openai.error.APIError, openai.error.RateLimitError) as e:
             logger.warning(f"Get exception from OpenAI: {e}")
-            await asyncio.sleep(i**2)
+            time.sleep(i**2)
