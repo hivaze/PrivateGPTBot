@@ -1,9 +1,7 @@
-import logging
-import time
-from logging.handlers import RotatingFileHandler
-
 import os
 import sys
+import time
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from .commands_handler import *

@@ -23,7 +23,13 @@ executor = Executor(dispatcher=dp)
 
 
 class UserState(StatesGroup):
+    menu = State()
     communication = State()
+
+
+async def reset_user_state(state):
+    await state.reset_data()
+    await UserState.menu.set()
 
 
 def run_pooling():
