@@ -17,14 +17,16 @@ class TypingBlock(object):
     def __init__(self, chat: types.Chat):
         self.chat = chat
         self.typing_task = None
+        self.doing = True
 
     async def __aenter__(self):
         await self.chat.do("typing")
 
         async def typing_cycle(chat):
             try:
-                await chat.do("typing")
-                await asyncio.sleep(1)
+                while self.doing:
+                    await chat.do("typing")
+                    await asyncio.sleep(2)
             except asyncio.CancelledError:
                 pass
 
@@ -32,6 +34,7 @@ class TypingBlock(object):
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.typing_task and isinstance(self.typing_task, asyncio.Task):
+            self.doing = False
             self.typing_task.cancel()
 
 
