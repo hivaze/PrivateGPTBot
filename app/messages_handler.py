@@ -72,7 +72,7 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
         prompt = PERSONALITIES[pers]['context']
         ai_message = await asyncio.get_event_loop().run_in_executor(None, create_message, prompt, history)
 
-    await message.answer(ai_message)
+    await message.reply(ai_message)
 
     logger.info(f"Отправлен очередной ответ юзеру {message.from_user.username}, бот {pers}")
 
