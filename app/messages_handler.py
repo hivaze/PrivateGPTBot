@@ -17,24 +17,21 @@ class TypingBlock(object):
     def __init__(self, chat: types.Chat):
         self.chat = chat
         self.typing_task = None
-        self.doing = True
 
     async def __aenter__(self):
-        await self.chat.do("typing")
 
-        async def typing_cycle(chat):
+        async def typing_cycle():
             try:
-                while self.doing:
-                    await chat.do("typing")
-                    await asyncio.sleep(2)
+                while True:
+                    await self.chat.do("typing")
+                    await asyncio.sleep(1)
             except asyncio.CancelledError:
                 pass
 
-        self.typing_task = asyncio.get_event_loop().create_task(typing_cycle(self.chat))
+        self.typing_task = asyncio.create_task(typing_cycle())
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self.typing_task and isinstance(self.typing_task, asyncio.Task):
-            self.doing = False
+        if self.typing_task:
             self.typing_task.cancel()
 
 
@@ -73,8 +70,9 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
     async with TypingBlock(message.chat):
         prompt = PERSONALITIES[pers]['context']
-        ai_message = await create_message(system_prompt=prompt, history=history)
-        await message.answer(ai_message)
+        ai_message = await asyncio.get_event_loop().run_in_executor(None, create_message, prompt, history)
+
+    await message.answer(ai_message)
 
     logger.info(f"Отправлен очередной ответ юзеру {message.from_user.username}, бот {pers}")
 
