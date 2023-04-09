@@ -83,12 +83,14 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
     logger.info(f"Отправлен очередной ответ юзеру {message.from_user.username}, бот {pers}")
 
     updated_data = await state.get_data()  # may be already changed due concurrency
-    updated_history = updated_data.get('history') + [
-        {"role": "user", "content": message.text},
-        {"role": "assistant", "content": ai_message}
-    ]
-    updated_history = updated_history[-CONFIG['last_messages_count']:]
+    if updated_data.get('pers') == pers:
+        updated_history = updated_data.get('history') or []
+        updated_history = updated_history + [
+            {"role": "user", "content": message.text},
+            {"role": "assistant", "content": ai_message}
+        ]
+        updated_history = updated_history[-CONFIG['last_messages_count']:]
 
-    logger.debug(f'История юзера {message.from_user.username}: {updated_history}')
+        logger.debug(f'История юзера {message.from_user.username}: {updated_history}')
 
-    await state.update_data({'history': updated_history})
+        await state.update_data({'history': updated_history})
