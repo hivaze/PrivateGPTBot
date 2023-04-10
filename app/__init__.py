@@ -4,8 +4,8 @@ import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from .commands_handler import *
-from .messages_handler import *
+from .command_handler import *
+from .message_handler import *
 
 Path('logs/').mkdir(exist_ok=True)
 

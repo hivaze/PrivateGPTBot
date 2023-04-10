@@ -3,7 +3,7 @@ import logging
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from app.exceptions_handler import exception_handler
+from app.exception_handler import exception_handler
 from .bot import dp, CONFIG, PERSONALITIES, reset_user_state
 
 PERSONALITIES_REPLY_MARKUP = [types.KeyboardButton(v['name']) for k, v in PERSONALITIES.items()]

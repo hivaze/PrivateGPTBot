@@ -4,7 +4,7 @@ import logging
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from app.exceptions_handler import exception_handler
+from app.exception_handler import exception_handler
 from . import PERSONALITIES_REPLY_MARKUP
 from .bot import dp, CONFIG, PERSONALITIES, UserState, reset_user_state
 from .open_ai_client import create_message
