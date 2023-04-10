@@ -4,7 +4,7 @@ import logging
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from app.exceptions_handler import exception_sorry
+from app.exceptions_handler import exception_handler
 from . import PERSONALITIES_REPLY_MARKUP
 from .bot import dp, CONFIG, PERSONALITIES, UserState, reset_user_state
 from .open_ai_client import create_message
@@ -36,7 +36,7 @@ class TypingBlock(object):
 
 
 @dp.message_handler(state=None)
-@exception_sorry()
+@exception_handler()
 async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
     if message.from_user.username in CONFIG['allowed_users']:
         await reset_user_state(state)
@@ -45,7 +45,7 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
 
 @dp.message_handler(state=UserState.menu)
-@exception_sorry()
+@exception_handler()
 async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
     text = message.text.strip()
@@ -63,7 +63,7 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
 
 @dp.message_handler(state=UserState.communication)
-@exception_sorry()
+@exception_handler()
 async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
     current_data = await state.get_data()
 

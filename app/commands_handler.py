@@ -3,7 +3,7 @@ import logging
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from app.exceptions_handler import exception_sorry
+from app.exceptions_handler import exception_handler
 from .bot import dp, CONFIG, PERSONALITIES, reset_user_state
 
 PERSONALITIES_REPLY_MARKUP = [types.KeyboardButton(v['name']) for k, v in PERSONALITIES.items()]
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @dp.message_handler(commands=["start", "reset"], state='*')
-@exception_sorry()
+@exception_handler()
 async def welcome_user(message: types.Message, state: FSMContext, *args, **kwargs):
 
     if message.from_user.username in CONFIG['allowed_users']:
