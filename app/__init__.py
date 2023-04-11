@@ -1,11 +1,12 @@
+import logging
 import os
 import sys
 import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from .commands_handler import *
-from .messages_handler import *
+import app.commands_handler
+import app.messages_handler
 
 Path('logs/').mkdir(exist_ok=True)
 
@@ -19,4 +20,4 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
 
-logging.basicConfig(level=logging.INFO, handlers=[stream_handler, file_handler])
+logging.basicConfig(level=logging.INFO, handlers=[stream_handler, file_handler])  # change level to DEBUG if needed

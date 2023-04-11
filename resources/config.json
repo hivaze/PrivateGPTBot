@@ -1,16 +1,19 @@
 {
   "OPENAI_KEY": "OPENAI_KEY",
   "TG_BOT_TOKEN": "TG_BOT_TOKEN",
-  "last_messages_count": 7,
+  "last_messages_count": 8,
   "allowed_users": [
     "hivaze",
     "lynnesso",
     "Whatevenif"
   ],
+  "append_tokens_count": false,
+  "openai_api_retries": 3,
   "generation_params": {
     "model": "gpt-3.5-turbo",
     "temperature": 0.8,
     "presence_penalty": 0.0,
+    "max_tokens": 1024,
     "n": 1,
     "top_p": 0.9
   }

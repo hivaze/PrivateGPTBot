@@ -5,8 +5,9 @@ import inspect
 
 from aiogram import types as aiogram_types
 
+from app.bot import MESSAGES
 
-SORRY_TEXT = "[ERROR] Прости, кажется что-то сломалось. Попробуй написать еще раз или обратись к @hivaze."
+SORRY_TEXT = MESSAGES['error']
 
 
 def exception_sorry():

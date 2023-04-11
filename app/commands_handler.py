@@ -4,10 +4,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from app.exceptions_handler import exception_sorry
-from .bot import dp, CONFIG, PERSONALITIES, reset_user_state
-
-PERSONALITIES_REPLY_MARKUP = [types.KeyboardButton(v['name']) for k, v in PERSONALITIES.items()]
-PERSONALITIES_REPLY_MARKUP = [PERSONALITIES_REPLY_MARKUP[i:i + 2] for i in range(0, len(PERSONALITIES_REPLY_MARKUP), 2)]
+from app.bot import dp, CONFIG, MESSAGES, reset_user_state, PERSONALITIES_REPLY_MARKUP
 
 logger = logging.getLogger(__name__)
 
@@ -18,19 +15,16 @@ async def welcome_user(message: types.Message, state: FSMContext, *args, **kwarg
 
     if message.from_user.username in CONFIG['allowed_users']:
         await reset_user_state(state)
+        text = MESSAGES['welcome']['with_access'] if message.get_command() != '/reset' else MESSAGES['welcome']['reset']
         reply_message = {
-            'text': 'Этот бот сделан @hivaze для ограниченного количества людей.'
-                    '\nВ основе ChatGPT и планируются некоторые другие модели.'
-                    '\n\nДля использования просто выбери нужный режим и пиши сообщения как в ChatGPT.'
-                    '\n\nВсе твои сообщения не сохраняются, я их не увижу.',
+            'text': text,
             'reply_markup': types.ReplyKeyboardMarkup(keyboard=PERSONALITIES_REPLY_MARKUP)
         }
-        logger.info(f"Юзер {message.from_user.username} с допуском инициировал бота")
+        logger.info(f"User {message.from_user.username} with access initialized the bot.")
     else:
         reply_message = {
-            'text': 'Этот бот сделан @hivaze для ограниченного количества людей.'
-                    '\n\nК сожалению, тебе нельзя пользоваться этим ботом :('
+            'text': MESSAGES['welcome']['no_access']
         }
-        logger.warning(f"Юзер {message.from_user.username} без допуска пытается использовать бота!!")
+        logger.warning(f"User {message.from_user.username} without access tries to use the bot!")
 
     await message.answer(**reply_message)
