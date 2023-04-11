@@ -86,13 +86,13 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
     ready_message = ai_message
 
     if removed_tokens > 0:
-        ready_message += f"\n------------------\n" \
-                         "Так как размер вашего сообщения оказался слишком большим, " \
+        ready_message += f"\n\n-----------------------\n" \
+                         "Так как размер истории сообщений довольно большой, " \
                          f"из истории сообщений было удалено {removed_tokens} токенов, " \
-                         f"но вы вероятно этого не заметите, советую присылать текста короче"
+                         f"но вы вероятно этого не заметите, присылайте текста короче."
 
     if CONFIG['append_tokens_count']:
-        ready_message += f"\n------------------\n" \
+        ready_message += f"\n\n-----------------------\n" \
                         f"Размер вашего сообщения: {count_tokens(message.text)}\n" \
                         f"Токенов в истории: {tokens_usage}"
 
