@@ -7,6 +7,7 @@ from pathlib import Path
 
 import app.commands_handler
 import app.messages_handler
+import app.blip_captions_model
 
 Path('logs/').mkdir(exist_ok=True)
 

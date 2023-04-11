@@ -1,9 +1,12 @@
 import asyncio
 import logging
+import tempfile
 
+from PIL import Image
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
+from app.blip_captions_model import get_images_captions
 from app.bot import dp, CONFIG, PERSONALITIES, UserState, reset_user_state, PERSONALITIES_REPLY_MARKUP, thread_pool
 from app.exceptions_handler import exception_sorry
 from app.open_ai_client import create_message, truncate_user_history, count_tokens
@@ -63,7 +66,7 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
 @dp.message_handler(state=UserState.communication)
 @exception_sorry()
-async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
+async def communication_answer(message: types.Message, state: FSMContext, *args, **kwargs):
     current_data = await state.get_data()
     user_name = message.from_user.username
 
@@ -112,3 +115,43 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
         logger.debug(f'History of user {message.from_user.username}: {updated_history}')
 
         await state.update_data({'history': updated_history, 'prev_tokens_usage': tokens_usage})
+
+
+@dp.message_handler(state=UserState.communication, content_types=['photo'])
+@exception_sorry()
+async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
+
+    current_data = await state.get_data()
+    user_name = message.from_user.username
+    pers = current_data.get('pers')
+
+    # if len(message.photo) > 3:
+    #     await message.reply("Вы прислали больше одной картинки в сообщении,"
+    #                         " я пока умею работать только с одной картинкой,"
+    #                         " отвечу только на последнюю!")
+
+    file_info = await message.bot.get_file(message.photo[-1].file_id)
+
+    with tempfile.TemporaryDirectory() as tmp_dir:  # temp dir for future support of many photos
+        result = await message.bot.download_file(file_path=file_info.file_path,
+                                                 destination_dir=tmp_dir)
+        result.close()
+        image = Image.open(result.name).convert('RGB')
+
+    image_caption = get_images_captions(image)[0]
+
+    if pers == 'joker' and not message.text:
+        chat_gpt_prompt = f"Create a joke like a meme about the image, it shows: {image_caption}." \
+                          f" Try be brief and post-ironic. Используй русский язык. Не начинай с Когда. "
+    else:
+        chat_gpt_prompt = f'Imagine that I sent you a picture, it shows: {image_caption}. Используй русский язык.'
+        if message.text != '' and message.text is not None:
+            chat_gpt_prompt = chat_gpt_prompt + ' ' + message.text
+    message.text = chat_gpt_prompt
+
+    logger.info(f'User {user_name} sends a picture with size ({image.width}, {image.height})')
+
+    # Debug breaks users privacy here! Disable it in general use!
+    logger.debug(f'Picture from {user_name}, pers: {pers}. Caption: "{image_caption}"')
+
+    await communication_answer(message, state)
