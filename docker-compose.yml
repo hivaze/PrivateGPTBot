@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  main:
+    container_name: PrivateGPTBot
+    build: .
+    volumes:
+      - ./resources:/bot/resources
