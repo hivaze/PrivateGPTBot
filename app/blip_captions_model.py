@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model_name = "Salesforce/blip-image-captioning-base"
+model_name = "Salesforce/blip-image-captioning-large"
 processor = AutoProcessor.from_pretrained(model_name)
 model = BlipForConditionalGeneration.from_pretrained(model_name).to(device)
 
