@@ -3,11 +3,14 @@ import logging
 import torch
 from transformers import AutoProcessor, BlipForConditionalGeneration
 
+from app.bot import CONFIG
+
 logger = logging.getLogger(__name__)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = CONFIG['blip']['device']
 
-model_name = "Salesforce/blip-image-captioning-large"
+model_name = "Salesforce/blip-image-captioning-large" if CONFIG['blip']['use_large'] \
+    else "Salesforce/blip-image-captioning-base"
 processor = AutoProcessor.from_pretrained(model_name)
 model = BlipForConditionalGeneration.from_pretrained(model_name).to(device)
 

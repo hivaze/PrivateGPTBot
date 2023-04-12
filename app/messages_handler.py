@@ -140,14 +140,14 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
     image_caption = get_images_captions(image)[0]
 
-    if pers == 'joker' and not message.text:
+    if pers == 'joker' and not message.caption:
         chat_gpt_prompt = f"Create a joke like a meme about the image, it shows: {image_caption}." \
-                          f" Try be brief and post-ironic." \
-                          f" Используй русский язык. Постарайся не использовать слово Когда."
+                          f" Try to be brief and post-ironic. Try to avoid starting with 'when you'." \
+                          f" Используй русский язык."
     else:
         chat_gpt_prompt = f'Imagine that I sent you a picture, it shows: {image_caption}. Используй русский язык.'
-        if message.text != '' and message.text is not None:
-            chat_gpt_prompt = chat_gpt_prompt + ' В дополнение к картинке: ' + message.text
+        if message.caption != '' and message.caption is not None:
+            chat_gpt_prompt = chat_gpt_prompt + ' В дополнение к картинке: ' + message.caption
     message.text = chat_gpt_prompt
 
     logger.info(f'User {user_name} sends a picture with size ({image.width}, {image.height})')

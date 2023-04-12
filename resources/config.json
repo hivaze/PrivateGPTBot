@@ -7,6 +7,10 @@
   ],
   "append_tokens_count": false,
   "openai_api_retries": 3,
+  "blip": {
+    "use_large": true,
+    "device": "cpu"
+  },
   "generation_params": {
     "model": "gpt-3.5-turbo",
     "temperature": 0.8,
