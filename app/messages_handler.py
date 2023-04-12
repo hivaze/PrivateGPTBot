@@ -7,7 +7,8 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from app.blip_captions_model import get_images_captions
-from app.bot import dp, CONFIG, PERSONALITIES, UserState, reset_user_state, PERSONALITIES_REPLY_MARKUP, thread_pool
+from app.bot import dp, CONFIG, PERSONALITIES, UserState, reset_user_state, PERSONALITIES_REPLY_MARKUP, thread_pool, \
+    MESSAGES
 from app.exceptions_handler import exception_sorry
 from app.open_ai_client import create_message, truncate_user_history, count_tokens
 
@@ -42,7 +43,7 @@ class TypingBlock(object):
 async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
     if message.from_user.username in CONFIG['allowed_users']:
         await reset_user_state(state)
-        await message.answer(f"Вероятно бот был перезагружен или обновлен. Снова выбери персонажа.",
+        await message.answer(MESSAGES['bot_reboot'],
                              reply_markup=types.ReplyKeyboardMarkup(keyboard=PERSONALITIES_REPLY_MARKUP))
 
 
@@ -53,14 +54,12 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
     text = message.text.strip()
     found = list(filter(lambda x: x[1]['name'] == text, PERSONALITIES.items()))
     if len(found) == 1:
-        await message.answer(f"Теперь можешь просто писать, спрашивать что угодно и тд. "
-                             f"Для перезапуска - /start или /reset. Удачи!",
+        await message.answer(MESSAGES['pers_selection']['go'],
                              reply_markup=types.ReplyKeyboardRemove())
         await state.update_data({'pers': found[0][0], 'history': []})
         await UserState.communication.set()
     else:
-        await message.answer(f"Ты должен выбрать персонажа для общения."
-                             f"\nУказанного персонажа не найдено, если считаешь это ошибкой пиши @hivaze",
+        await message.answer(MESSAGES['pers_selection']['mistake'],
                              reply_markup=types.ReplyKeyboardMarkup(keyboard=PERSONALITIES_REPLY_MARKUP))
 
 
@@ -89,15 +88,11 @@ async def communication_answer(message: types.Message, state: FSMContext, *args,
     ready_message = ai_message
 
     if removed_tokens > 0:
-        ready_message += f"\n\n-----------------------\n" \
-                         "Так как размер истории сообщений довольно большой, " \
-                         f"из истории сообщений было удалено {removed_tokens} токенов, " \
-                         f"но вы вероятно этого не заметите, присылайте текста короче."
+        ready_message += MESSAGES['tokens']['notion'].format(removed_tokens=removed_tokens)
 
     if CONFIG['append_tokens_count']:
-        ready_message += f"\n\n-----------------------\n" \
-                        f"Размер вашего сообщения: {count_tokens(message.text)}\n" \
-                        f"Токенов в истории: {tokens_usage}"
+        message_size = count_tokens(message.text)
+        ready_message += MESSAGES['tokens']['notion'].format(message_size=message_size, tokens_usage=tokens_usage)
 
     await message.reply(ready_message)
 
@@ -125,11 +120,6 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
     user_name = message.from_user.username
     pers = current_data.get('pers')
 
-    # if len(message.photo) > 3:
-    #     await message.reply("Вы прислали больше одной картинки в сообщении,"
-    #                         " я пока умею работать только с одной картинкой,"
-    #                         " отвечу только на последнюю!")
-
     file_info = await message.bot.get_file(message.photo[-1].file_id)
 
     with tempfile.TemporaryDirectory() as tmp_dir:  # temp dir for future support of many photos
@@ -140,14 +130,13 @@ async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
     image_caption = get_images_captions(image)[0]
 
-    if pers == 'joker' and not message.caption:
-        chat_gpt_prompt = f"Create a joke like a meme about the image, it shows: {image_caption}." \
-                          f" Try to be brief and post-ironic. Try to avoid starting with 'when you'." \
-                          f" Используй русский язык."
+    if pers == 'joker':
+        chat_gpt_prompt = CONFIG['blip_gpt_prompts']['joker'].format(image_caption=image_caption)
     else:
-        chat_gpt_prompt = f'Imagine that I sent you a picture, it shows: {image_caption}. Используй русский язык.'
-        if message.caption != '' and message.caption is not None:
-            chat_gpt_prompt = chat_gpt_prompt + ' В дополнение к картинке: ' + message.caption
+        chat_gpt_prompt = CONFIG['blip_gpt_prompts']['basic'].format(image_caption=image_caption)
+    if message.caption != '' and message.caption is not None:
+        chat_gpt_prompt = CONFIG['blip_gpt_prompts']['caption_message'].format(prompt=chat_gpt_prompt,
+                                                                               message=message.caption)
     message.text = chat_gpt_prompt
 
     logger.info(f'User {user_name} sends a picture with size ({image.width}, {image.height})')

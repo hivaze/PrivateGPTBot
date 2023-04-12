@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @exception_sorry()
 async def welcome_user(message: types.Message, state: FSMContext, *args, **kwargs):
 
-    if message.from_user.username in CONFIG['allowed_users']:
+    if message.from_user.username in CONFIG['allowed_users'] or CONFIG['global_mode']:
         await reset_user_state(state)
         text = MESSAGES['welcome']['with_access'] if message.get_command() != '/reset' else MESSAGES['welcome']['reset']
         reply_message = {
