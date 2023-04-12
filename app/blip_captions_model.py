@@ -12,18 +12,15 @@ device = CONFIG['blip']['device']
 model_name = "Salesforce/blip-image-captioning-large" if CONFIG['blip']['use_large'] \
     else "Salesforce/blip-image-captioning-base"
 processor = AutoProcessor.from_pretrained(model_name)
+
 model = BlipForConditionalGeneration.from_pretrained(model_name).to(device)
+model = torch.compile(model)
 
-logger.debug(f'BLIP model loaded: {model_name}, device: {device}')
-
-if device == 'cuda':
-    model.half()
+print(f'BLIP model loaded: {model_name}, device: {device}')
 
 
 def get_images_captions(images):
     inputs = processor(images=images, return_tensors="pt").to(device)
-    if device == 'cuda':
-        inputs = inputs.to(torch.half)
 
     with torch.inference_mode():
         generated_ids = model.generate(**inputs,
