@@ -5,7 +5,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from app.exceptions_handler import exception_sorry
-from app.bot import dp, CONFIG, MESSAGES, USERS, build_reply_markup, load_configs
+from app.bot import dp, CONFIG, MESSAGES, USERS, build_reply_markup, load_configs, save_users_data
 from app.user_service import reset_user_state, check_user_permission, UserState, check_is_admin, save_user
 
 logger = logging.getLogger(__name__)
@@ -61,6 +61,7 @@ async def reload(message: types.Message, state: FSMContext, *args, **kwargs):
     user_name = message.from_user.username
 
     if check_is_admin(user_name):
+        await save_users_data()
         load_configs()
         reply_message = {
             'text': 'Configs reloaded. Main config:\n\n' + json.dumps(CONFIG, indent=2)
