@@ -7,10 +7,10 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from app.blip_captions_model import get_images_captions
-from app.bot import dp, CONFIG, PERSONALITIES, UserState, reset_user_state, PERSONALITIES_REPLY_MARKUP, thread_pool, \
-    MESSAGES
+from app.bot import dp, CONFIG, PERSONALITIES, build_reply_markup, thread_pool, MESSAGES, global_message
 from app.exceptions_handler import exception_sorry
 from app.open_ai_client import create_message, truncate_user_history, count_tokens
+from app.user_service import UserState, reset_user_state, check_user_permission
 
 logger = logging.getLogger(__name__)
 
@@ -38,29 +38,42 @@ class TypingBlock(object):
             self.typing_task.cancel()
 
 
+@dp.message_handler(state=UserState.admin_message)
+@exception_sorry()
+async def admin_message(message: types.Message, state: FSMContext, *args, **kwargs):
+
+    await message.answer('Now your message will be sent to all known users...')
+    await global_message(message.md_text)
+    await message.answer('Done!')
+
+    await reset_user_state(state)
+
+
 @dp.message_handler(state=None)
 @exception_sorry()
-async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
-    if message.from_user.username in CONFIG['allowed_users']:
+async def default_answer(message: types.Message, state: FSMContext, *args, **kwargs):
+    user_name = message.from_user.username
+    if check_user_permission(user_name):
         await reset_user_state(state)
         await message.answer(MESSAGES['bot_reboot'],
-                             reply_markup=types.ReplyKeyboardMarkup(keyboard=PERSONALITIES_REPLY_MARKUP))
+                             reply_markup=build_reply_markup(user_name))
 
 
 @dp.message_handler(state=UserState.menu)
 @exception_sorry()
-async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
+async def pers_selection_answer(message: types.Message, state: FSMContext, *args, **kwargs):
+    user_name = message.from_user.username
 
     text = message.text.strip()
     found = list(filter(lambda x: x[1]['name'] == text, PERSONALITIES.items()))
     if len(found) == 1:
         await message.answer(MESSAGES['pers_selection']['go'],
                              reply_markup=types.ReplyKeyboardRemove())
-        await state.update_data({'pers': found[0][0], 'history': []})
+        await state.update_data({'pers': found[0][0]})
         await UserState.communication.set()
     else:
         await message.answer(MESSAGES['pers_selection']['mistake'],
-                             reply_markup=types.ReplyKeyboardMarkup(keyboard=PERSONALITIES_REPLY_MARKUP))
+                             reply_markup=build_reply_markup(user_name))
 
 
 @dp.message_handler(state=UserState.communication)
@@ -107,14 +120,14 @@ async def communication_answer(message: types.Message, state: FSMContext, *args,
         ]
 
         # Debug breaks users privacy here! Disable it in general use!
-        logger.debug(f'History of user {message.from_user.username}: {updated_history}')
+        logger.debug(f'History of user {user_name}: {updated_history}')
 
         await state.update_data({'history': updated_history, 'prev_tokens_usage': tokens_usage})
 
 
 @dp.message_handler(state=UserState.communication, content_types=['photo'])
 @exception_sorry()
-async def answer(message: types.Message, state: FSMContext, *args, **kwargs):
+async def photo_answer(message: types.Message, state: FSMContext, *args, **kwargs):
 
     current_data = await state.get_data()
     user_name = message.from_user.username

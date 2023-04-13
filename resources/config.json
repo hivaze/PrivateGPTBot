@@ -1,8 +1,9 @@
 {
   "OPENAI_KEY": "OPENAI_KEY",
   "TG_BOT_TOKEN": "TG_BOT_TOKEN",
-  "last_messages_count": 8,
+  "last_messages_count": 10,
   "global_mode": false,
+  "admin": "hivaze",
   "allowed_users": [
     "hivaze"
   ],
