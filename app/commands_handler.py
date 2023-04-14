@@ -44,9 +44,11 @@ async def welcome_user(message: types.Message, state: FSMContext, *args, **kwarg
 @exception_sorry()
 async def send_message(message: types.Message, state: FSMContext, *args, **kwargs):
     user_name = message.from_user.username
+    do_markdown = message.text.split(' ').__len__() > 1
 
     if check_is_admin(user_name):
         await UserState.admin_message.set()
+        await state.update_data({'do_markdown': do_markdown})
         reply_message = {
             'text': f'In the next message, write a message that will be sent to all known users.'
                     f' Users count: {len(USERS)}',

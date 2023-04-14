@@ -43,10 +43,23 @@ class TypingBlock(object):
 async def admin_message(message: types.Message, state: FSMContext, *args, **kwargs):
 
     await message.answer('Now your message will be sent to all known users...')
-    await global_message(message.md_text)
+    data = await state.get_data()
+    if data['do_markdown']:
+        await global_message(message.md_text, do_markdown=True)
+    else:
+        await global_message(message.text, do_markdown=False)
     await message.answer('Done!')
 
     await reset_user_state(state)
+
+
+@dp.message_handler(state=UserState.custom_pers_setup)
+@exception_sorry()
+async def custom_personality(message: types.Message, state: FSMContext, *args, **kwargs):
+
+    await state.update_data({'custom_prompt': message.text.strip()})
+    await UserState.communication.set()
+    await message.answer(MESSAGES['pers_selection']['go'])
 
 
 @dp.message_handler(state=None)
@@ -71,6 +84,11 @@ async def pers_selection_answer(message: types.Message, state: FSMContext, *args
                              reply_markup=types.ReplyKeyboardRemove())
         await state.update_data({'pers': found[0][0]})
         await UserState.communication.set()
+    elif text == MESSAGES['custom_personality']['button']:
+        await state.update_data({'pers': 'custom'})
+        await UserState.custom_pers_setup.set()
+        await message.answer(MESSAGES['custom_personality']['info'],
+                             reply_markup=types.ReplyKeyboardRemove())
     else:
         await message.answer(MESSAGES['pers_selection']['mistake'],
                              reply_markup=build_reply_markup(user_name))
@@ -83,7 +101,7 @@ async def communication_answer(message: types.Message, state: FSMContext, *args,
     user_name = message.from_user.username
 
     pers = current_data.get('pers')
-    pers_prompt = PERSONALITIES[pers]['context']
+    pers_prompt = PERSONALITIES[pers]['context'] if pers != 'custom' else current_data.get('custom_prompt')
 
     orig_history = current_data.get('history') or []
     history = orig_history + [{"role": "user", "content": message.text}]

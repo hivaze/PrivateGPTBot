@@ -5,6 +5,7 @@ from app.bot import CONFIG, USERS
 
 class UserState(StatesGroup):
     menu = State()
+    custom_pers_setup = State()
     communication = State()
     admin_message = State()
 
