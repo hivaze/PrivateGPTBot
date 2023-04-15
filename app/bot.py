@@ -16,7 +16,7 @@ def build_reply_markup(user_name):
     markup = [types.KeyboardButton(v['name']) for k, v in PERSONALITIES.items()]
     markup = [markup[i:i + 2] for i in range(0, len(markup), 2)]
     markup = markup + [[MESSAGES['custom_personality']['button']]]
-    return types.ReplyKeyboardMarkup(keyboard=markup)
+    return types.ReplyKeyboardMarkup(keyboard=markup, resize_keyboard=True)
 
 
 def load_configs(*args, **kwargs):
