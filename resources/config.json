@@ -1,7 +1,7 @@
 {
   "OPENAI_KEY": "OPENAI_KEY",
   "TG_BOT_TOKEN": "TG_BOT_TOKEN",
-  "last_messages_count": 10,
+  "last_messages_count": 12,
   "global_mode": false,
   "admin": "hivaze",
   "allowed_users": [
@@ -14,16 +14,16 @@
     "device": "cpu"
   },
   "blip_gpt_prompts": {
-    "joker": "Create a joke like a meme about the image, it shows: {image_caption}. Try to be brief and post-ironic. Try to avoid starting with 'when you'. Используй русский язык.",
-    "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Используй русский язык.",
-    "caption_message": "{prompt} В дополнение к картинке: {message}"
+    "joker": "Create a joke like a meme about the image, it shows: {image_caption}. Try to be brief and post-ironic. Try to avoid starting with 'when you'. Use only russian language",
+    "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Use only russian language.",
+    "caption_message": "{prompt} In addition to image: {message}"
   },
   "generation_params": {
     "model": "gpt-3.5-turbo",
-    "temperature": 0.8,
+    "temperature": 0.7,
     "presence_penalty": 0.0,
     "max_tokens": 896,
     "n": 1,
-    "top_p": 0.9
+    "top_p": 0.8
   }
 }
