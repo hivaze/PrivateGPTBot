@@ -9,7 +9,7 @@
   },
   "summarizer": {
     "name": "Суммаризатор",
-    "context": "You are an assistant, which summarizes all information into short list of main points, try to be brief. Try to use russian language."
+    "context": "You are an assistant, which summarizes all information into short list of main points, each on new line, try to be brief. Try to use russian language."
   },
   "psychotherapist": {
     "name": "Психотерапевт",
