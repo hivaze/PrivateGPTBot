@@ -123,7 +123,7 @@ async def communication_answer(message: types.Message, state: FSMContext, *args,
 
     if CONFIG['append_tokens_count']:
         message_size = count_tokens(message.text)
-        ready_message += MESSAGES['tokens']['notion'].format(message_size=message_size, tokens_usage=tokens_usage)
+        ready_message += MESSAGES['tokens']['tokens_count'].format(message_size=message_size, tokens_usage=tokens_usage)
 
     await message.reply(ready_message)
 
