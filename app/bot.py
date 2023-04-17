@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -33,6 +34,7 @@ def load_configs(*args, **kwargs):
         MESSAGES.update(json.load(file))
         logger.info(f"Messaged config loaded.")
 
+    Path('resources/users_data.json').touch(exist_ok=True)
     with open('resources/users_data.json') as file:  # Dumb way to store users, must be changed to Postgres
         USERS.update(json.load(file))
         logger.info(f"Users file loaded. Count: {len(USERS.keys())}")

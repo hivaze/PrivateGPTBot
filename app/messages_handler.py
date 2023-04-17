@@ -10,7 +10,7 @@ from app.blip_captions_model import get_images_captions
 from app.bot import dp, CONFIG, PERSONALITIES, build_reply_markup, thread_pool, MESSAGES, global_message
 from app.exceptions_handler import exception_sorry
 from app.open_ai_client import create_message, truncate_user_history, count_tokens
-from app.user_service import UserState, reset_user_state, check_user_permission
+from app.user_service import UserState, reset_user_state, check_user_permission, check_is_admin
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ async def communication_answer(message: types.Message, state: FSMContext, *args,
 
     await message.reply(ready_message)
 
-    logger.info(f"Another reply to user '{user_name}' sent, personality '{pers}'")
+    logger.info(f"Another reply to user '{user_name}' sent, personality '{pers}', used tokens: {tokens_usage}")
 
     updated_data = await state.get_data()  # may be already changed due concurrency
     if updated_data.get('pers') == pers:
