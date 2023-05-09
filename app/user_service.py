@@ -17,7 +17,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from app.bot import settings
 from app.utils import parse_timedelta
 
-engine = create_engine('sqlite:///resources/users.db', echo=True)
+engine = create_engine('sqlite:///resources/users.db', echo=False)
 session_factory = sessionmaker(engine, expire_on_commit=False)
 Base = declarative_base()
 
@@ -75,6 +75,9 @@ class MessageEntity(Base):
     executed_at = Column(DateTime, nullable=False)
 
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+
+
+Base.metadata.create_all(engine)
 
 
 # ------- Helper functions -------
