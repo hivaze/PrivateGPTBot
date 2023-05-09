@@ -27,7 +27,7 @@ async def welcome_user(message: types.Message, state: FSMContext, *args, **kwarg
             logger.info(f"User '{tg_user.username}' | '{tg_user.id}' with access initialized the bot.")
         else:
             text = settings.messages['welcome']['reset']
-            logger.info(f"User '{tg_user.username}' | '{tg_user.id}'with access reset the bot.")
+            logger.info(f"User '{tg_user.username}' | '{tg_user.id}' with access reset the bot.")
 
         reply_message = {
             'text': text,
