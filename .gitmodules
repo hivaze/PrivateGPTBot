@@ -1,0 +1,3 @@
+[submodule "chatgpt-retrieval-plugin"]
+	path = chatgpt-retrieval-plugin
+	url = https://github.com/openai/chatgpt-retrieval-plugin

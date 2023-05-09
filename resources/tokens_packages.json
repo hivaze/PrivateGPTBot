@@ -1,0 +1,22 @@
+{
+  "trial": {
+    "amount": 46080,
+    "duration": "3d"
+  },
+  "newbie": {
+    "amount": 184320,
+    "duration": "30d"
+  },
+  "adept": {
+    "amount": 614400,
+    "duration": "30d"
+  },
+  "normal": {
+    "amount": 1351680,
+    "duration": "30d"
+  },
+  "pro": {
+    "amount": 2703360,
+    "duration": "30d"
+  }
+}

@@ -4,7 +4,7 @@
   "last_messages_count": 12,
   "global_mode": false,
   "admin": "hivaze",
-  "allowed_users": [
+  "white_list_users": [
     "hivaze"
   ],
   "append_tokens_count": false,
@@ -14,13 +14,13 @@
     "device": "cpu"
   },
   "blip_gpt_prompts": {
-    "joker": "Create a joke like a meme about the image, it shows: {image_caption}. Try to be brief and post-ironic. Try to avoid starting with 'when you'. Use only russian language",
+    "joker": "Create a meme using the image, it shows: {image_caption}. Try to be brief and postironic. Try to avoid starting with 'when you'. Use only russian language.",
     "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Use only russian language.",
     "caption_message": "{prompt} In addition to image: {message}"
   },
   "generation_params": {
     "model": "gpt-3.5-turbo",
-    "temperature": 0.7,
+    "temperature": 0.8,
     "presence_penalty": 0.0,
     "max_tokens": 896,
     "n": 1,

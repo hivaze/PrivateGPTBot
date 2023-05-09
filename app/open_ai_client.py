@@ -4,19 +4,18 @@ import time
 import openai
 from openai.openai_object import OpenAIObject
 
-from app.bot import CONFIG
 import tiktoken
 import numpy as np
 
-logger = logging.getLogger(__name__)
-openai.api_key = CONFIG['OPENAI_KEY']
+from app.bot import settings
 
-chat_gpt_encoder = tiktoken.encoding_for_model(CONFIG['generation_params']['model'])
+logger = logging.getLogger(__name__)
+openai.api_key = settings.config['OPENAI_KEY']
+
+chat_gpt_encoder = tiktoken.encoding_for_model(settings.config['generation_params']['model'])
 
 CHATGPT_MAX_LENGTH = 4096  # claimed by OpenAI
-ALLOWED_TOTAL_HIST_TOKENS = CHATGPT_MAX_LENGTH - CONFIG['generation_params'].get('max_tokens', 1024)
-
-DEFAULT_TOKENS_USAGE = {"completion_tokens": 0, "prompt_tokens": 0, "total_tokens": 0}
+ALLOWED_TOTAL_HIST_TOKENS = CHATGPT_MAX_LENGTH - settings.config['generation_params'].get('max_tokens', 1024)
 
 
 def create_message(user_name, system_prompt, history):
@@ -29,13 +28,14 @@ def create_message(user_name, system_prompt, history):
     """
     history = history or []
     messages = [{"role": "system", "content": system_prompt}] + history
-    for i in range(0, CONFIG['openai_api_retries']):
+    for i in range(0, settings.config['openai_api_retries']):
         try:
-            response: OpenAIObject = openai.ChatCompletion.create(messages=messages, **CONFIG['generation_params'])
+            response: OpenAIObject = openai.ChatCompletion.create(messages=messages,
+                                                                  **settings.config['generation_params'])
             return response['choices'][0]['message']['content'], response['usage']['total_tokens']
         except (openai.error.APIError, openai.error.RateLimitError) as e:
             logger.warning(f"Get exception from OpenAI for {user_name}: {e}")
-            time.sleep(i ** 2)  # wait longer
+            time.sleep(2**i)  # wait longer
 
 
 def count_tokens(text):

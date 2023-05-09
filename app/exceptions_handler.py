@@ -5,9 +5,9 @@ import inspect
 
 from aiogram import types as aiogram_types
 
-from app.bot import MESSAGES
+from app.bot import settings
 
-SORRY_TEXT = MESSAGES['error']
+SORRY_TEXT = settings.messages['error']
 
 
 def exception_sorry():
