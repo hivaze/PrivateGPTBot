@@ -24,10 +24,10 @@ async def welcome_user(message: types.Message, state: FSMContext, *args, **kwarg
 
         if message.get_command() != '/reset':
             text = settings.messages['welcome']['with_access']
-            logger.info(f"User '{tg_user.username}' with access initialized the bot.")
+            logger.info(f"User '{tg_user.username}' | '{tg_user.id}' with access initialized the bot.")
         else:
             text = settings.messages['welcome']['reset']
-            logger.info(f"User '{tg_user.username}' with access reset the bot.")
+            logger.info(f"User '{tg_user.username}' | '{tg_user.id}'with access reset the bot.")
 
         reply_message = {
             'text': text,
@@ -37,7 +37,7 @@ async def welcome_user(message: types.Message, state: FSMContext, *args, **kwarg
         reply_message = {
             'text': settings.messages['welcome']['no_access']
         }
-        logger.warning(f"User '{tg_user.username}' without access tries to use the bot!")
+        logger.warning(f"User '{tg_user.username}' | '{tg_user.id}' without access tries to use the bot!")
 
     await message.answer(**reply_message)
 
@@ -68,11 +68,11 @@ async def ban(message: types.Message, state: FSMContext, *args, **kwargs):
         user_name = message.text.split(' ')[1]
         if ban_username(user_name):
             reply_message = {
-                'text': f'User {user_name} successfully banned'
+                'text': f'User {user_name} successfully banned!'
             }
         else:
             reply_message = {
-                'text': f'User {user_name} does not exists banned'
+                'text': f'User {user_name} does not exists banned, maybe does not exits.'
             }
         await message.answer(**reply_message)
 

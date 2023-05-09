@@ -203,7 +203,7 @@ async def photo_answer(message: types.Message, state: FSMContext, *args, **kwarg
                                                                                         message=message.caption)
     message.text = chat_gpt_prompt
 
-    logger.info(f'User {tg_user.username} sends a picture with size ({image.width}, {image.height})')
+    logger.info(f"User '{tg_user.username}' sends a picture with size ({image.width}, {image.height})")
 
     # Debug breaks users privacy here! Disable it in general use!
     logger.debug(f'Picture from {tg_user.username}, pers: {pers}. Caption: "{image_caption}"')

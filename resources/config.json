@@ -14,7 +14,7 @@
     "device": "cpu"
   },
   "blip_gpt_prompts": {
-    "joker": "Create a meme using the image, it shows: {image_caption}. Try to be brief and postironic. Try to avoid starting with 'when you'. Use only russian language.",
+    "joker": "Create a meme using the provided image. Image shows: {image_caption}. Try to be brief and postironic. Try to avoid starting with 'when you'. Use only russian language.",
     "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Use only russian language.",
     "caption_message": "{prompt} In addition to image: {message}"
   },
