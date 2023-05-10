@@ -1,5 +1,7 @@
 import json
 import logging
+from datetime import datetime
+import numpy as np
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -8,7 +10,8 @@ from app.bot import settings, dp
 from app.bot_utils import build_menu_markup
 from app.exceptions_handler import exception_sorry
 from app.user_service import reset_user_state, UserState, check_user_access, \
-    check_is_admin, ban_username, has_tokens_package, init_tokens_package, get_or_create_user, get_all_users
+    check_is_admin, ban_username, has_tokens_package,\
+    init_tokens_package, get_or_create_user, get_all_users, get_all_messages
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +77,29 @@ async def ban(message: types.Message, state: FSMContext, *args, **kwargs):
             reply_message = {
                 'text': f'User {user_name} does not exists banned, maybe does not exits.'
             }
+        await message.answer(**reply_message)
+
+
+@dp.message_handler(commands=["status"], state=UserState.menu)
+@exception_sorry()
+async def ban(message: types.Message, state: FSMContext, *args, **kwargs):
+    tg_user = message.from_user
+
+    if check_is_admin(tg_user):
+        all_messages = get_all_messages()
+        today_messages = [m for m in all_messages if m.executed_at.date() == datetime.today().date()]
+        total_used_tokens = np.array([m.used_tokens for m in all_messages])
+        all_users = get_all_users()
+        today_new_users = [user for user in all_users if user.joined_at.date() == datetime.today().date()]
+        reply_message = {
+            'text': f'Chatbot status:\n\n'
+                    f'Total users count: {len(all_users)}\n'
+                    f'Today new users: {len(today_new_users)}\n\n'
+                    f'Total messages count: {len(all_messages)}\n'
+                    f'Today total messages: {len(today_messages)}\n\n'
+                    f'Total used tokens: {total_used_tokens.sum()}\n'
+                    f'Average used tokens (per message): {total_used_tokens.mean()}'
+        }
         await message.answer(**reply_message)
 
 

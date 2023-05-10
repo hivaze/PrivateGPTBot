@@ -161,8 +161,11 @@ def get_or_create_user(session: Session, tg_user: User) -> UserEntity:
 
 
 @with_session
-def get_all_users(session: Session) -> typing.List[UserEntity]:
-    users = session.scalars(select(UserEntity).where(UserEntity.ban != True)).all()
+def get_all_users(session: Session, with_banned=False) -> typing.List[UserEntity]:
+    if with_banned:
+        users = session.scalars(select(UserEntity)).all()
+    else:
+        users = session.scalars(select(UserEntity).where(UserEntity.ban != True)).all()
     return users
 
 
@@ -197,6 +200,12 @@ def add_message_record(session: Session,
     message_entity.user_id = user_id
     session.add(message_entity)
     return message_entity.user
+
+
+@with_session
+def get_all_messages(session: Session) -> typing.List[MessageEntity]:
+    all_messages = session.scalars(select(MessageEntity)).all()
+    return all_messages
 
 
 # ------- Tokens section -------
