@@ -15,7 +15,7 @@ from app.exceptions_handler import exception_sorry
 from app.open_ai_client import create_message, truncate_user_history, count_tokens
 from app.user_service import UserState, reset_user_state, \
     check_user_access, get_or_create_user, add_message_record, \
-    TokensUsageStatus, MessageEntity, check_tokens, tokens_spending, reset_tokens_package, Role
+    TokensUsageStatus, MessageEntity, check_tokens, tokens_spending, init_tokens_package, Role
 
 logger = logging.getLogger(__name__)
 
@@ -118,8 +118,8 @@ async def communication_answer(message: types.Message, state: FSMContext, is_ima
             coroutine_locks[tg_user.id].release()
             return
         else:
-            reset_tokens_package(user)
-            logger.info(f"Resetting '{tg_user.username}' | '{tg_user.id}' tokens package due PRIVILEGED role.")
+            init_tokens_package(user)
+            logger.info(f"Reinitializing '{tg_user.username}' | '{tg_user.id}' tokens package due PRIVILEGED role.")
 
     # Personality prompt
     pers = current_data.get('pers')

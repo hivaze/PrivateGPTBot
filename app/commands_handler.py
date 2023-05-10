@@ -8,7 +8,7 @@ from app.bot import settings, dp
 from app.bot_utils import build_menu_markup
 from app.exceptions_handler import exception_sorry
 from app.user_service import reset_user_state, UserState, check_user_access, \
-    check_is_admin, ban_username, has_tokens_package, reset_tokens_package, get_or_create_user, get_all_users
+    check_is_admin, ban_username, has_tokens_package, init_tokens_package, get_or_create_user, get_all_users
 
 logger = logging.getLogger(__name__)
 

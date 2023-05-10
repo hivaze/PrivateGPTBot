@@ -36,12 +36,12 @@ class TokensPackageEntity(Base):
     id = Column("id", Integer, primary_key=True)
 
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    user = relationship("UserEntity", uselist=False, back_populates="tokens_package", lazy='joined')
+    # user = relationship("UserEntity", uselist=False, back_populates="tokens_package", lazy='joined')
 
     created_at = Column(DateTime, nullable=False)
     expires_at = Column(DateTime, nullable=False)
     package_name = Column(String(20), nullable=False)
-    left_tokens = Column(Integer, default=-1, nullable=False)
+    left_tokens = Column(Integer, default=0, nullable=False)
 
 
 class UserEntity(Base):
@@ -58,9 +58,7 @@ class UserEntity(Base):
 
     ban = Column(Boolean, default=False, nullable=False)
 
-    # token_package_id = Column(Integer, ForeignKey('tokens_packages.id'), nullable=True)
-    tokens_package = relationship("TokensPackageEntity", uselist=False, back_populates="user",
-                                  cascade="all, delete-orphan")
+    tokens_packages = relationship("TokensPackageEntity", backref="user", cascade="all, delete-orphan")
     messages = relationship("MessageEntity", backref="user", cascade="all, delete-orphan")
 
 
@@ -113,7 +111,7 @@ def _get_user_by_id(session: Session,
 
 
 def _get_user_by_name(session: Session,
-              user_name: str) -> UserEntity:
+                      user_name: str) -> UserEntity:
     result = session.scalars(select(UserEntity).where(UserEntity.user_name == user_name))
     return result.first()
 
@@ -210,36 +208,43 @@ class TokensUsageStatus(enum.Enum):
     ALLOWED = "allowed"
 
 
+def _find_tokens_package(session: Session, user_id: int):
+    return session.scalars(select(TokensPackageEntity)
+                           .order_by(TokensPackageEntity.left_tokens.desc())
+                           .where(TokensPackageEntity.user_id == user_id)
+                           ).first()
+
+
 @with_session
-def set_tokens_package(session: Session, user_id: int, package_name: str):
-    user = _get_user_by_id(session, user_id)
+def add_new_tokens_package(session: Session, user_id: int, package_name: str):
     package = settings.tokens_packages[package_name]
     created_at = datetime.now()
     expires_at = created_at + parse_timedelta(package['duration'])
-    user.tokens_package = TokensPackageEntity(created_at=created_at,
-                                              expires_at=expires_at,
-                                              package_name=package_name,
-                                              left_tokens=package['amount'])
+    tokens_package = TokensPackageEntity(created_at=created_at,
+                                         expires_at=expires_at,
+                                         package_name=package_name,
+                                         left_tokens=package['amount'])
+    tokens_package.user_id = user_id
+    session.add(tokens_package)
 
 
-def reset_tokens_package(user: UserEntity):
+def init_tokens_package(user: UserEntity):
     if user.role in [Role.PRIVILEGED]:
         package_name = list(settings.tokens_packages.keys())[-1]
     else:
         package_name = 'trial'
-    set_tokens_package(user.user_id, package_name)
+    add_new_tokens_package(user.user_id, package_name)
 
 
 @with_session
 def has_tokens_package(session: Session, user_id: int) -> bool:
-    tokens_package = session.scalars(select(TokensPackageEntity).where(TokensPackageEntity.user_id == user_id)).first()
+    tokens_package = _find_tokens_package(session, user_id)
     return tokens_package is not None
 
 
 @with_session
 def check_tokens(session: Session, user_id: int) -> TokensUsageStatus:
-    user = _get_user_by_id(session, user_id)
-    tokens_package = user.tokens_package
+    tokens_package = _find_tokens_package(session, user_id)
     if tokens_package.expires_at > datetime.now():
         if tokens_package.left_tokens <= 0:
             return TokensUsageStatus.NOT_ENOUGH
@@ -251,16 +256,15 @@ def check_tokens(session: Session, user_id: int) -> TokensUsageStatus:
 
 @with_session
 def tokens_spending(session: Session, user_id: int, tokens_count):
-    user = _get_user_by_id(session, user_id)
-    left_tokens = user.tokens_package.left_tokens
+    tokens_package = _find_tokens_package(session, user_id)
+    left_tokens = tokens_package.left_tokens
     left_tokens = max(left_tokens - tokens_count, 0)
-    user.tokens_package.left_tokens = left_tokens
+    tokens_package.left_tokens = left_tokens
 
 
 @with_session
 def get_tokens_info(session: Session, user_id: int):
-    user = _get_user_by_id(session, user_id)
-    tokens_package = user.tokens_package
+    tokens_package = _find_tokens_package(session, user_id)
     return tokens_package.left_tokens, tokens_package.expires_at
 
 
@@ -278,7 +282,7 @@ async def reset_user_state(tg_user, state):
     user = get_or_create_user(tg_user)
 
     if not has_tokens_package(tg_user.id):
-        reset_tokens_package(user)
+        init_tokens_package(user)
 
     await state.reset_data()
     await UserState.menu.set()
@@ -286,12 +290,11 @@ async def reset_user_state(tg_user, state):
 
 def main() -> None:
     Base.metadata.create_all(engine)
-    # await add_message_record(test_user.user_id, MessageEntity(tg_message_id=234, used_tokens=394,
-    #                                                           has_image=False, executed_at=datetime.datetime.now()))
-    # print(len(test_user.user_name))
-    engine.dispose()
-    user = get_all_users()[0]
-    print(user._session)
+    with session_factory() as session:
+        user = _get_user_by_name(session, user_name="hivaze")
+        # print(select(UserEntity).where(UserEntity.messages.any(MessageEntity.has_image == 1)))
+        print(user.tokens_packages[0])
+        session.close()
 
 
 if __name__ == '__main__':
