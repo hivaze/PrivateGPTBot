@@ -45,7 +45,6 @@ async def admin_message(message: types.Message, state: FSMContext, *args, **kwar
     await message.answer(**reply_message)
 
 
-
 @dp.message_handler(state=UserState.custom_pers_setup)
 @exception_sorry()
 async def custom_personality(message: types.Message, state: FSMContext, *args, **kwargs):
@@ -98,75 +97,78 @@ async def pers_selection_answer(message: types.Message, state: FSMContext, *args
 
 
 @dp.message_handler(state=UserState.communication)
-# @exception_sorry()
+@exception_sorry()
 async def communication_answer(message: types.Message, state: FSMContext, is_image=False, *args, **kwargs):
     tg_user = message.from_user
 
     await coroutine_locks[tg_user.id].acquire()
 
-    current_data = await state.get_data()
+    try:
 
-    user = get_or_create_user(tg_user)
+        current_data = await state.get_data()
 
-    if user.ban:
-        await no_access_message(tg_user, message)
-        coroutine_locks[tg_user.id].release()
-        return
+        user = get_or_create_user(tg_user)
 
-    if check_tokens(tg_user.id) != TokensUsageStatus.ALLOWED:
-        if user.role != Role.PRIVILEGED:
+        if user.ban:
+            await no_access_message(tg_user, message)
             coroutine_locks[tg_user.id].release()
             return
-        else:
-            init_tokens_package(user)
-            logger.info(f"Reinitializing '{tg_user.username}' | '{tg_user.id}' tokens package due PRIVILEGED role.")
 
-    # Personality prompt
-    pers = current_data.get('pers')
-    pers_prompt = settings.personalities[pers]['context'] if pers != 'custom' else current_data.get('custom_prompt')
+        if check_tokens(tg_user.id) != TokensUsageStatus.ALLOWED:
+            if user.role != Role.PRIVILEGED:
+                coroutine_locks[tg_user.id].release()
+                return
+            else:
+                init_tokens_package(user)
+                logger.info(f"Reinitializing '{tg_user.username}' | '{tg_user.id}' tokens package due PRIVILEGED role.")
 
-    # Messages history management
-    orig_history = current_data.get('history') or []
-    history = orig_history + [{"role": "user", "content": message.text}]
-    previous_tokens_usage = current_data.get('prev_tokens_usage') or 0
-    previous_tokens_usage += count_tokens(message.text)  # maybe +10? (openai...)
-    history = history[-settings.config['last_messages_count']:]
-    history, removed_tokens = truncate_user_history(tg_user.username, pers_prompt, history, previous_tokens_usage)
+        # Personality prompt
+        pers = current_data.get('pers')
+        pers_prompt = settings.personalities[pers]['context'] if pers != 'custom' else current_data.get('custom_prompt')
 
-    # request loop (do typing)
-    async with TypingBlock(message.chat):
-        ai_message, tokens_usage = await asyncio.get_event_loop().run_in_executor(thread_pool,
-                                                                                  create_message,
-                                                                                  tg_user.username,
-                                                                                  pers_prompt, history)
-        add_message_record(tg_user.id, MessageEntity(tg_message_id=message.message_id,
-                                                     used_tokens=tokens_usage,
-                                                     has_image=is_image,
-                                                     executed_at=datetime.datetime.now()))
-        tokens_spending(tg_user.id, tokens_usage)
+        # Messages history management
+        orig_history = current_data.get('history') or []
+        history = orig_history + [{"role": "user", "content": message.text}]
+        previous_tokens_usage = current_data.get('prev_tokens_usage') or 0
+        previous_tokens_usage += count_tokens(message.text)  # maybe +10? (openai...)
+        history = history[-settings.config['last_messages_count']:]
+        history, removed_tokens = truncate_user_history(tg_user.username, pers_prompt, history, previous_tokens_usage)
 
-    sent_message = await message.reply(ai_message)
+        # request loop (do typing)
+        async with TypingBlock(message.chat):
+            ai_message, tokens_usage = await asyncio.get_event_loop().run_in_executor(thread_pool,
+                                                                                      create_message,
+                                                                                      tg_user.username,
+                                                                                      pers_prompt, history)
+            add_message_record(tg_user.id, MessageEntity(tg_message_id=message.message_id,
+                                                         used_tokens=tokens_usage,
+                                                         has_image=is_image,
+                                                         executed_at=datetime.datetime.now()))
+            tokens_spending(tg_user.id, tokens_usage)
 
-    if removed_tokens > 0:
-        await sent_message.reply(settings.messages['tokens']['notion'].format(removed_tokens=removed_tokens))
+        sent_message = await message.reply(ai_message)
 
-    if settings.config['append_tokens_count']:
-        message_size = count_tokens(message.text)
-        await sent_message.reply(settings.messages['tokens']['tokens_count'].format(message_size=message_size,
-                                                                                    tokens_usage=tokens_usage))
+        if removed_tokens > 0:
+            await sent_message.reply(settings.messages['tokens']['notion'].format(removed_tokens=removed_tokens))
 
-    logger.info(f"Another reply to user '{tg_user.username}' | '{tg_user.id}' sent, personality '{pers}',"
-                f" used tokens: {tokens_usage}")
+        if settings.config['append_tokens_count']:
+            message_size = count_tokens(message.text)
+            await sent_message.reply(settings.messages['tokens']['tokens_count'].format(message_size=message_size,
+                                                                                        tokens_usage=tokens_usage))
 
-    updated_history = history + [
-        {"role": "assistant", "content": ai_message}
-    ]
+        logger.info(f"Another reply to user '{tg_user.username}' | '{tg_user.id}' sent, personality '{pers}',"
+                    f" used tokens: {tokens_usage}")
 
-    logger.debug(f'History of user {tg_user.username}: {updated_history}')
+        updated_history = history + [
+            {"role": "assistant", "content": ai_message}
+        ]
 
-    await state.update_data({'history': updated_history, 'prev_tokens_usage': tokens_usage})
+        logger.debug(f'History of user {tg_user.username}: {updated_history}')
 
-    coroutine_locks[tg_user.id].release()
+        await state.update_data({'history': updated_history, 'prev_tokens_usage': tokens_usage})
+
+    finally:
+        coroutine_locks[tg_user.id].release()
 
 
 @dp.message_handler(state=UserState.communication, content_types=['photo'])
