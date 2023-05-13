@@ -71,6 +71,8 @@ class MessageEntity(Base):
     used_tokens = Column(Integer, default=0, nullable=False)
     has_image = Column(Boolean, default=False, nullable=False)
     executed_at = Column(DateTime, nullable=False)
+    personality = Column(String(50), nullable=False)
+    history_size = Column(Integer, default=1, nullable=False)
 
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
 

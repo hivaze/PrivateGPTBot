@@ -19,7 +19,7 @@ from app.user_service import UserState, reset_user_state, \
 
 logger = logging.getLogger(__name__)
 
-coroutine_locks = defaultdict(asyncio.Lock)
+coroutine_locks_cache = defaultdict(asyncio.Lock)  # TODO: Maybe replace it with LFU cache of Users objects
 
 
 @dp.message_handler(state=UserState.admin_message)
@@ -101,9 +101,9 @@ async def pers_selection_answer(message: types.Message, state: FSMContext, *args
 async def communication_answer(message: types.Message, state: FSMContext, is_image=False, *args, **kwargs):
     tg_user = message.from_user
 
-    await coroutine_locks[tg_user.id].acquire()
+    await coroutine_locks_cache[tg_user.id].acquire()
 
-    try:
+    try:  # try-finally block for precise lock release
 
         current_data = await state.get_data()
 
@@ -111,12 +111,12 @@ async def communication_answer(message: types.Message, state: FSMContext, is_ima
 
         if user.ban:
             await no_access_message(tg_user, message)
-            coroutine_locks[tg_user.id].release()
+            coroutine_locks_cache[tg_user.id].release()
             return
 
         if check_tokens(tg_user.id) != TokensUsageStatus.ALLOWED:
             if user.role != Role.PRIVILEGED:
-                coroutine_locks[tg_user.id].release()
+                coroutine_locks_cache[tg_user.id].release()
                 return
             else:
                 init_tokens_package(user)
@@ -142,6 +142,8 @@ async def communication_answer(message: types.Message, state: FSMContext, is_ima
                                                                                       pers_prompt, history)
             add_message_record(tg_user.id, MessageEntity(tg_message_id=message.message_id,
                                                          used_tokens=tokens_usage,
+                                                         personality=pers,
+                                                         history_size=len(history),
                                                          has_image=is_image,
                                                          executed_at=datetime.datetime.now()))
             tokens_spending(tg_user.id, tokens_usage)
@@ -159,16 +161,15 @@ async def communication_answer(message: types.Message, state: FSMContext, is_ima
         logger.info(f"Another reply to user '{tg_user.username}' | '{tg_user.id}' sent, personality '{pers}',"
                     f" used tokens: {tokens_usage}")
 
-        updated_history = history + [
-            {"role": "assistant", "content": ai_message}
-        ]
-
-        logger.debug(f'History of user {tg_user.username}: {updated_history}')
-
-        await state.update_data({'history': updated_history, 'prev_tokens_usage': tokens_usage})
+        # We need to check if pers is the same as in start of the message execution
+        new_data = await state.get_data()
+        if new_data.get('pers') == pers:
+            updated_history = history + [{"role": "assistant", "content": ai_message}]
+            await state.update_data({'history': updated_history, 'prev_tokens_usage': tokens_usage})
+            logger.debug(f'History of user {tg_user.username}: {updated_history}')
 
     finally:
-        coroutine_locks[tg_user.id].release()
+        coroutine_locks_cache[tg_user.id].release()
 
 
 @dp.message_handler(state=UserState.communication, content_types=['photo'])
@@ -181,7 +182,7 @@ async def photo_answer(message: types.Message, state: FSMContext, *args, **kwarg
 
     if user.ban:
         await no_access_message(tg_user, message)
-        coroutine_locks[tg_user.id].release()
+        coroutine_locks_cache[tg_user.id].release()
         return
 
     file_info = await message.bot.get_file(message.photo[-1].file_id)

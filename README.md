@@ -12,7 +12,7 @@
 - Все сообщения можно изменить, чтобы было удобнее запускать из коробки
 - Можно запустить в Docker
 
-Используемые фреймворки: `aiogram`, `openai`, `transformers` и `torch`. \
+Используемые фреймворки: `aiogram`, `SQLAlchemy`, `openai`, `transformers` и `torch`. \
 Полный список зависимостей (7 штук) в `requirements.txt`.
 
 Все конфиги находятся в `resources/`.
