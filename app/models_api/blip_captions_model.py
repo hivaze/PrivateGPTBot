@@ -7,9 +7,9 @@ from app.bot import settings
 
 logger = logging.getLogger(__name__)
 
-device = settings.config['blip']['device']
+device = settings.config.blip.device
 
-model_name = "Salesforce/blip-image-captioning-large" if settings.config['blip']['use_large'] \
+model_name = "Salesforce/blip-image-captioning-large" if settings.config.blip.use_large \
     else "Salesforce/blip-image-captioning-base"
 processor = AutoProcessor.from_pretrained(model_name)
 

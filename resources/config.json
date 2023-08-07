@@ -1,16 +1,22 @@
 {
   "OPENAI_KEY": "OPENAI_KEY",
   "TG_BOT_TOKEN": "TG_BOT_TOKEN",
-  "last_messages_count": 12,
+  "context": {
+    "last_messages_count": 16,
+    "max_context_size": 16380
+  },
   "global_mode": false,
-  "admin": "hivaze",
+  "admins": [
+    "hivaze"
+  ],
   "white_list_users": [
     "hivaze"
   ],
   "append_tokens_count": false,
   "openai_api_retries": 3,
+  "bot_max_users_memory": 50,
   "blip": {
-    "use_large": true,
+    "use_large": false,
     "device": "cpu"
   },
   "blip_gpt_prompts": {
@@ -19,11 +25,11 @@
     "caption_message": "{prompt} In addition to image: {message}"
   },
   "generation_params": {
-    "model": "gpt-3.5-turbo",
-    "temperature": 0.8,
+    "model": "gpt-3.5-turbo-16k",
+    "temperature": 0.7,
     "presence_penalty": 0.0,
-    "max_tokens": 896,
+    "max_tokens": 1024,
     "n": 1,
-    "top_p": 0.8
+    "top_p": 0.9
   }
 }
