@@ -1,7 +1,23 @@
 version: "3.9"
 services:
+
   main:
     container_name: PrivateGPTBot
     build: .
     volumes:
       - ./resources:/bot/resources
+
+  postgres:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_USER: "test_user"
+      POSTGRES_PASSWORD: "testPassword123"
+      POSTGRES_DB: "app_db"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    volumes:
+      - bot-data:/var/lib/postgresql/data
+
+volumes:
+  bot-data:

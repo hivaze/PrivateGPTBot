@@ -5,6 +5,12 @@ import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from app.settings import BotSettings
+
+settings = BotSettings()
+
+import app.handlers
+
 Path('logs/').mkdir(exist_ok=True)
 
 file_name = os.path.join('logs', time.strftime("%Y-%m-%d-%H-%M-%S") + '.log')
@@ -18,8 +24,3 @@ file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
 
 logging.basicConfig(level=logging.INFO, handlers=[stream_handler, file_handler])  # change level to DEBUG if needed
-
-import app.commands_handler
-import app.messages_handler
-import app.blip_captions_model
-

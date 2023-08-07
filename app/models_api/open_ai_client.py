@@ -10,12 +10,12 @@ import numpy as np
 from app.bot import settings
 
 logger = logging.getLogger(__name__)
-openai.api_key = settings.config['OPENAI_KEY']
+openai.api_key = settings.config.OPENAI_KEY
 
-chat_gpt_encoder = tiktoken.encoding_for_model(settings.config['generation_params']['model'])
+chat_gpt_encoder = tiktoken.encoding_for_model(settings.config.generation_params['model'])
 
-CHATGPT_MAX_LENGTH = 4096  # claimed by OpenAI
-ALLOWED_TOTAL_HIST_TOKENS = CHATGPT_MAX_LENGTH - settings.config['generation_params'].get('max_tokens', 1024)
+CHATGPT_MAX_LENGTH = settings.config.context.max_context_size  # claimed by OpenAI
+ALLOWED_TOTAL_HIST_TOKENS = CHATGPT_MAX_LENGTH - settings.config.generation_params.get('max_tokens', 1024)
 
 
 def create_message(user_name, system_prompt, history):
@@ -28,10 +28,10 @@ def create_message(user_name, system_prompt, history):
     """
     history = history or []
     messages = [{"role": "system", "content": system_prompt}] + history
-    for i in range(0, settings.config['openai_api_retries']):
+    for i in range(0, settings.config.openai_api_retries):
         try:
             response: OpenAIObject = openai.ChatCompletion.create(messages=messages,
-                                                                  **settings.config['generation_params'])
+                                                                  **settings.config.generation_params)
             return response['choices'][0]['message']['content'], response['usage']['total_tokens']
         except (openai.error.APIError, openai.error.RateLimitError) as e:
             logger.warning(f"Get exception from OpenAI for {user_name}: {e}")
