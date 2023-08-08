@@ -31,7 +31,6 @@ def _create_user_kwargs(session: Session, **kwargs) -> UserEntity:
     user_entity = UserEntity(**kwargs,
                              role=Role.DEFAULT, joined_at=datetime.now())
     session.add(user_entity)
-    session.flush()
     return user_entity
 
 
@@ -40,7 +39,6 @@ def _create_user_tg(session: Session, tg_user: User) -> UserEntity:
                              first_name=tg_user.first_name, language_code=tg_user.language_code,
                              role=Role.DEFAULT, joined_at=datetime.now())
     session.add(user_entity)
-    session.flush()
     return user_entity
 
 

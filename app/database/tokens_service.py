@@ -32,7 +32,6 @@ def add_new_tokens_package(session: Session, user_id: int, package_name: str):
                                          left_tokens=package.amount)
     tokens_package.user_id = user_id
     session.add(tokens_package)
-    session.flush()
 
 
 def init_tokens_package(session: Session, user: UserEntity):

@@ -18,7 +18,6 @@ def add_message_record(session: Session,
                        user_id: int, message_entity: MessageEntity) -> UserEntity:
     message_entity.user_id = user_id
     session.add(message_entity)
-    session.flush()
     return message_entity.user
 
 
