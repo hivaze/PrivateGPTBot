@@ -38,7 +38,7 @@ def _create_user_kwargs(session: Session, **kwargs) -> UserEntity:
 def _create_user_tg(session: Session, tg_user: User) -> UserEntity:
     user_entity = UserEntity(user_id=tg_user.id, user_name=tg_user.username,
                              first_name=tg_user.first_name, language_code=tg_user.language_code,
-                             role=Role.PRIVILEGED, joined_at=datetime.now())  # TODO: Change role to DEFAULT
+                             role=Role.DEFAULT, joined_at=datetime.now())
     session.add(user_entity)
     session.flush()
     return user_entity
@@ -75,13 +75,19 @@ def get_all_users(session: Session, with_banned=False) -> typing.List[UserEntity
     return users
 
 
+def get_user_model(user: UserEntity):
+    if user.role == Role.PRIVILEGED:
+        return settings.config.models.privileged
+    return settings.config.models.default
+
+
 def check_user_access(session: Session, tg_user: User) -> bool:
     user = _get_user_by_id(session, tg_user.id)
     if user is not None:
         if user.ban:
             return False
     if not settings.config.global_mode:
-        return tg_user.username in settings.config.white_list_users or tg_user.username in settings.config.admins
+        return tg_user.username in settings.config.white_list_users or check_is_admin(tg_user)
     else:
         return True
 
@@ -108,3 +114,5 @@ async def reset_user_state(session: Session, tg_user, state):
 
     await state.reset_data()
     await UserState.menu.set()
+
+    return user

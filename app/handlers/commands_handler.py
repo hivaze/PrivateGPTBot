@@ -13,7 +13,7 @@ from app.database.db_service import with_session
 from app.database.messages_service import get_all_messages, get_avg_hist_size_by_user, get_avg_tokens_by_user, \
     get_avg_tokens_per_message, get_avg_messages_by_user
 from app.database.users_service import check_user_access, reset_user_state, UserState, check_is_admin, get_all_users, \
-    ban_username
+    ban_username, get_or_create_user, get_user_model
 from app.handlers.exceptions_handler import zero_exception
 
 logger = logging.getLogger(__name__)
@@ -27,10 +27,12 @@ async def welcome_user(session: Session, message: types.Message, state: FSMConte
 
     if check_user_access(session, tg_user):
 
-        await reset_user_state(session, tg_user, state)
+        user = await reset_user_state(session, tg_user, state)
+
+        model_config = get_user_model(user)
 
         if message.get_command() != '/reset':
-            text = settings.messages.welcome.with_access
+            text = settings.messages.welcome.with_access.format(model_name=model_config.model_name)
             logger.info(f"User '{tg_user.username}' | '{tg_user.id}' with access initialized the bot.")
         else:
             text = settings.messages.welcome.reset

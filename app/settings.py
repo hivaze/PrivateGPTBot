@@ -21,18 +21,26 @@ class BlipGptPrompts(BaseModel):
     caption_message: str
 
 
-class ContextConfig(BaseModel):
+class ModelConfig(BaseModel):
     last_messages_count: int
     max_context_size: int
+    model_name: str
+
+
+class ModelsConfig(BaseModel):
+    default: ModelConfig
+    privileged: ModelConfig
 
 
 class BotConfig(BaseModel):
     OPENAI_KEY: str
     TG_BOT_TOKEN: str
-    context: ContextConfig
+    models: ModelsConfig
     global_mode: bool
+    free_mode: bool
     admins: List[str]
     bot_max_users_memory: int
+    instant_messages_waiting: int
     white_list_users: List[str]
     append_tokens_count: bool
     openai_api_retries: int

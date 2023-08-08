@@ -1,11 +1,20 @@
 {
   "OPENAI_KEY": "OPENAI_KEY",
   "TG_BOT_TOKEN": "TG_BOT_TOKEN",
-  "context": {
-    "last_messages_count": 16,
-    "max_context_size": 16380
+  "models": {
+    "default": {
+      "model_name": "gpt-3.5-turbo-16k",
+      "last_messages_count": 18,
+      "max_context_size": 16380
+    },
+    "privileged": {
+      "model_name": "gpt-4",
+      "last_messages_count": 14,
+      "max_context_size": 8190
+    }
   },
   "global_mode": false,
+  "free_mode": true,
   "admins": [
     "hivaze"
   ],
@@ -15,6 +24,7 @@
   "append_tokens_count": false,
   "openai_api_retries": 3,
   "bot_max_users_memory": 50,
+  "instant_messages_waiting": 400,
   "blip": {
     "use_large": false,
     "device": "cpu"
@@ -25,7 +35,6 @@
     "caption_message": "{prompt} In addition to image: {message}"
   },
   "generation_params": {
-    "model": "gpt-3.5-turbo-16k",
     "temperature": 0.7,
     "presence_penalty": 0.0,
     "max_tokens": 1024,
