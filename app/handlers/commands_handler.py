@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 @dp.message_handler(commands=["start", "reset"], state='*')
-@with_session
 @zero_exception
+@with_session
 async def welcome_user(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
 
@@ -52,8 +52,8 @@ async def welcome_user(session: Session, message: types.Message, state: FSMConte
 
 
 @dp.message_handler(commands=["send_message"], state=UserState.menu)
-@with_session
 @zero_exception
+@with_session
 async def send_message(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
     do_markdown = message.text.split(' ').__len__() > 1
@@ -80,8 +80,8 @@ async def send_db_file(message: types.Message, state: FSMContext, *args, **kwarg
 
 
 @dp.message_handler(commands=["ban"], state=UserState.menu)
-@with_session
 @zero_exception
+@with_session
 async def ban(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
 
@@ -99,8 +99,8 @@ async def ban(session: Session, message: types.Message, state: FSMContext, *args
 
 
 @dp.message_handler(commands=["status"], state=UserState.menu)
-@with_session
 @zero_exception
+@with_session
 async def status(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
 

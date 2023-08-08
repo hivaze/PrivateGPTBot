@@ -28,8 +28,8 @@ DEFAULT_MESSAGE_FORMAT = "{message}"
 
 
 @dp.message_handler(state=UserState.admin_message)
-@with_session
 @zero_exception
+@with_session
 async def admin_message(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
 
@@ -57,8 +57,8 @@ async def custom_personality(message: types.Message, state: FSMContext, *args, *
 
 
 @dp.message_handler(state=None)
-@with_session
 @zero_exception
+@with_session
 async def default_answer(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
     if check_user_access(session, tg_user):
@@ -126,8 +126,8 @@ async def instant_messages_collector(state, message):
 
 
 @dp.message_handler(state=UserState.communication)
-@with_session
 @zero_exception
+@with_session
 async def communication_answer(session: Session, message: types.Message,
                                state: FSMContext, is_image=False, *args, **kwargs):
     tg_user = message.from_user
@@ -233,8 +233,8 @@ async def communication_answer(session: Session, message: types.Message,
 
 
 @dp.message_handler(state=UserState.communication, content_types=['photo'])
-@with_session
 @zero_exception
+@with_session
 async def photo_answer(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
 
