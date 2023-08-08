@@ -12,6 +12,18 @@ time_regexp = re.compile(
     r'^((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?$')
 
 
+def safe_copy_dict(old_d: typing.Dict = None):
+    if old_d is None:
+        return None
+    new_d = {}
+    for key, value in old_d.items():
+        try:
+            new_d[key] = copy.deepcopy(value)
+        except TypeError:
+            new_d[key] = value
+    return new_d
+
+
 class LRUCache:
 
     def __init__(self, capacity):
@@ -88,7 +100,7 @@ class LRUMutableMemoryStorage(BaseStorage):
         if user not in self.data[chat]:
             self.data[chat][user] = {'state': None, 'data': {}, 'bucket': {}}
 
-        return self.data[chat][user]['data']
+        return safe_copy_dict(self.data[chat][user]['data'])
 
     async def update_data(self, *,
                           chat: typing.Union[str, int, None] = None,
@@ -111,7 +123,7 @@ class LRUMutableMemoryStorage(BaseStorage):
                        user: typing.Union[str, int, None] = None,
                        data: typing.Dict = None):
         chat, user = self.resolve_address(chat=chat, user=user)
-        self.data[chat][user]['data'] = data
+        self.data[chat][user]['data'] = safe_copy_dict(data)
         self._cleanup(chat, user)
 
     async def reset_state(self, *,
@@ -131,14 +143,14 @@ class LRUMutableMemoryStorage(BaseStorage):
                          user: typing.Union[str, int, None] = None,
                          default: typing.Optional[dict] = None) -> typing.Dict:
         chat, user = self.resolve_address(chat=chat, user=user)
-        return copy.deepcopy(self.data[chat][user]['bucket'])
+        return safe_copy_dict(self.data[chat][user]['bucket'])
 
     async def set_bucket(self, *,
                          chat: typing.Union[str, int, None] = None,
                          user: typing.Union[str, int, None] = None,
                          bucket: typing.Dict = None):
         chat, user = self.resolve_address(chat=chat, user=user)
-        self.data[chat][user]['bucket'] = copy.deepcopy(bucket)
+        self.data[chat][user]['bucket'] = safe_copy_dict(bucket)
         self._cleanup(chat, user)
 
     async def update_bucket(self, *,
