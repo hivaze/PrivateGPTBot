@@ -250,7 +250,7 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
 
     if message.is_forward():
         await message.reply(settings.messages.image_forward)
-        await communication_answer(message, state=state, is_image=False)
+        await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=False))
         return
 
     file_info = await message.bot.get_file(message.photo[-1].file_id)
@@ -279,4 +279,4 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
     # Debug breaks users privacy here! Disable it in general use!
     logger.debug(f'Picture from {tg_user.username}, pers: {pers}. Caption: "{image_caption}"')
 
-    await communication_answer(message, state=state, is_image=True)
+    await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=True))
