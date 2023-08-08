@@ -249,6 +249,7 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
         return
 
     if message.is_forward():
+        session.close()
         await message.reply(settings.messages.image_forward)
         await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=False))
         return
@@ -279,4 +280,5 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
     # Debug breaks users privacy here! Disable it in general use!
     logger.debug(f'Picture from {tg_user.username}, pers: {pers}. Caption: "{image_caption}"')
 
+    session.close()
     await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=True))
