@@ -248,6 +248,11 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
         messages_lock.release()
         return
 
+    if message.is_forward():
+        await message.reply(settings.messages.image_forward)
+        await communication_answer(message, state=state, is_image=False)
+        return
+
     file_info = await message.bot.get_file(message.photo[-1].file_id)
 
     with tempfile.TemporaryDirectory() as tmp_dir:  # temp dir for future support of many photos

@@ -99,6 +99,7 @@ class MessagesConfig(BaseModel):
     pers_selection: PersSelectionText
     bot_reboot: str
     error: str
+    image_forward: str
     specialties: SpecialtiesText
     custom_personality: CustomPersonalityText
 
@@ -152,4 +153,5 @@ class BotSettings:
 if __name__ == '__main__':
     bot_settings = BotSettings()
     print(bot_settings.config)
+    print(bot_settings.messages)
     print(bot_settings.tokens_packages)
