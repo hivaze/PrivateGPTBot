@@ -69,6 +69,12 @@ class MessageEntity(Base):
     personality = Column(String(50), nullable=False)
     history_size = Column(Integer, default=1, nullable=False)
 
+    # new fields
+    query_tokens = Column(Integer, default=None, nullable=True)
+    time_taken = Column(Integer, default=None, nullable=True)
+    instant_buffer = Column(Integer, default=1, nullable=False)
+    model = Column(String(50), nullable=False)
+
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
 
 

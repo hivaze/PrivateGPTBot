@@ -13,23 +13,24 @@ logger = logging.getLogger(__name__)
 openai.api_key = settings.config.OPENAI_KEY
 
 
-def generate_message(user_name, model_config, system_prompt, history=None):
+def generate_message(user_name, model_config, system_prompt, history):
     """
     Sends a request to OpenAI API, blocks until response, do openai_api_retries retries to bypass rate limits
     :param user_name: tg username
     :param model_config: ModelConfig
     :param system_prompt: one of personalities
     :param history: user history messages
-    :return: ChatGPT answer and tokens usage statistics dict
+    :return: ChatGPT answer and tokens usage statistics dict, also time taken in ms
     """
-    history = history or []
+    start_time = int(time.time() * 1000)
     messages = [{"role": "system", "content": system_prompt}] + history
     for i in range(0, settings.config.openai_api_retries):
         try:
             response: OpenAIObject = openai.ChatCompletion.create(messages=messages,
                                                                   model=model_config.model_name,
                                                                   **settings.config.generation_params)
-            return response['choices'][0]['message']['content'], response['usage']['total_tokens']
+            time_taken = int(time.time() * 1000) - start_time
+            return response['choices'][0]['message']['content'], response['usage']['total_tokens'], time_taken
         except (openai.error.APIError, openai.error.RateLimitError) as e:
             logger.warning(f"Get exception from OpenAI for {user_name}: {e}")
             time.sleep(2**i)  # wait longer

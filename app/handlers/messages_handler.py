@@ -168,14 +168,15 @@ async def communication_answer(session: Session, message: types.Message,
         # Messages history management
         orig_history = current_user_data.get('history') or []
         instant_messages_buffer = current_user_data.get('instant_messages_buffer') or []
-        instant_messages_buffer = "\n\n".join(instant_messages_buffer)
-        history = orig_history + [{"role": "user", "content": instant_messages_buffer}]
+        concatenated_message = "\n\n".join(instant_messages_buffer)
+        history = orig_history + [{"role": "user", "content": concatenated_message}]
 
         # request loop (do typing)
         async with TypingBlock(message.chat):
 
             previous_tokens_usage = current_user_data.get('prev_tokens_usage') or 0
-            previous_tokens_usage += count_tokens(model_config, message.text)  # maybe +10? (openai...)
+            query_tokens = count_tokens(model_config, concatenated_message)
+            previous_tokens_usage += query_tokens  # maybe +10? (openai...)
 
             history = history[-model_config.last_messages_count:]
             history, removed_tokens = truncate_user_history(tg_user.username,
@@ -184,17 +185,21 @@ async def communication_answer(session: Session, message: types.Message,
                                                             history,
                                                             previous_tokens_usage)
 
-            ai_message, tokens_usage = await asyncio.get_event_loop().run_in_executor(thread_pool,
-                                                                                      generate_message,
-                                                                                      tg_user.username,
-                                                                                      model_config,
-                                                                                      pers_prompt,
-                                                                                      history)
+            ai_message, tokens_usage, ms_time = await asyncio.get_event_loop().run_in_executor(thread_pool,
+                                                                                               generate_message,
+                                                                                               tg_user.username,
+                                                                                               model_config,
+                                                                                               pers_prompt,
+                                                                                               history)
             add_message_record(session, tg_user.id, MessageEntity(tg_message_id=message.message_id,
                                                                   used_tokens=tokens_usage,
                                                                   personality=pers,
                                                                   history_size=len(history),
                                                                   has_image=is_image,
+                                                                  query_tokens=query_tokens,
+                                                                  time_taken=ms_time,
+                                                                  instant_buffer=len(instant_messages_buffer),
+                                                                  model=model_config.model_name,
                                                                   executed_at=datetime.datetime.now()))
             tokens_spending(session, tg_user.id, tokens_usage)
 
@@ -208,8 +213,7 @@ async def communication_answer(session: Session, message: types.Message,
                                      disable_notification=True)
 
         if settings.config.append_tokens_count:
-            message_size = count_tokens(model_config, message.text)
-            await sent_message.reply(settings.messages.tokens.tokens_count.format(message_size=message_size,
+            await sent_message.reply(settings.messages.tokens.tokens_count.format(message_size=query_tokens,
                                                                                   tokens_usage=tokens_usage),
                                      disable_notification=True)
 
@@ -250,7 +254,10 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
 
     if message.is_forward():
         await message.reply(settings.messages.image_forward)
-        await communication_answer(message, state=state, is_image=False)
+
+        message.text = message.caption
+        await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=False))
+
         return
 
     file_info = await message.bot.get_file(message.photo[-1].file_id)
@@ -279,4 +286,4 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
     # Debug breaks users privacy here! Disable it in general use!
     logger.debug(f'Picture from {tg_user.username}, pers: {pers}. Caption: "{image_caption}"')
 
-    await communication_answer(message, state=state, is_image=True)
+    await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=True))
