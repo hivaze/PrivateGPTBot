@@ -111,12 +111,8 @@ async def instant_messages_collector(state, message):
             message=message.text))
     else:
         instant_messages_buffer.append(DEFAULT_MESSAGE_FORMAT.format(message=message.text))
-    await state.update_data(
-        {
-            'instant_messages_buffer': instant_messages_buffer
-        }
-    )
-    # await asyncio.sleep(1000000)
+
+    await state.update_data({'instant_messages_buffer': instant_messages_buffer})
     await asyncio.sleep(settings.config.instant_messages_waiting / 1000.0)  # waiting in seconds
 
     current_user_data = await state.get_data()
@@ -141,6 +137,12 @@ async def communication_answer(session: Session, message: types.Message,
 
     try:  # try-finally block for precise lock release
 
+        # Concat instant messages
+        instant_messages_buffer = current_user_data.get('instant_messages_buffer') or []
+        concatenated_message = "\n\n".join(instant_messages_buffer)
+        await state.update_data({'instant_messages_buffer': []})
+
+        # Get or crete user entity
         user = get_or_create_user(session, tg_user)
         model_config = get_user_model(user)
 
@@ -149,6 +151,7 @@ async def communication_answer(session: Session, message: types.Message,
             messages_lock.release()
             return
 
+        # Check if enough tokens
         if check_tokens(session, tg_user.id) != TokensUsageStatus.ALLOWED:
             if user.role != Role.PRIVILEGED and not settings.config.free_mode:
                 messages_lock.release()
@@ -167,8 +170,6 @@ async def communication_answer(session: Session, message: types.Message,
 
         # Messages history management
         orig_history = current_user_data.get('history') or []
-        instant_messages_buffer = current_user_data.get('instant_messages_buffer') or []
-        concatenated_message = "\n\n".join(instant_messages_buffer)
         history = orig_history + [{"role": "user", "content": concatenated_message}]
 
         # request loop (do typing)
@@ -227,8 +228,7 @@ async def communication_answer(session: Session, message: types.Message,
             await state.update_data(
                 {
                     'history': updated_history,
-                    'prev_tokens_usage': tokens_usage,
-                    'instant_messages_buffer': []
+                    'prev_tokens_usage': tokens_usage
                 }
             )
             logger.debug(f'History of user {tg_user.username}: {updated_history}')
