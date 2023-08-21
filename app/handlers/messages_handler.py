@@ -111,14 +111,20 @@ async def instant_messages_collector(state, message):
             message=message.text))
     else:
         instant_messages_buffer.append(DEFAULT_MESSAGE_FORMAT.format(message=message.text))
-
     await state.update_data({'instant_messages_buffer': instant_messages_buffer})
+
     await asyncio.sleep(settings.config.instant_messages_waiting / 1000.0)  # waiting in seconds
 
     current_user_data = await state.get_data()
     new_buffer = current_user_data.get('instant_messages_buffer') or []
 
-    return len(instant_messages_buffer) == len(new_buffer), current_user_data
+    do_answer = len(instant_messages_buffer) == len(new_buffer)
+    concatenated_message = None
+    if do_answer:
+        await state.update_data({'instant_messages_buffer': []})
+        concatenated_message = "\n\n".join(instant_messages_buffer)
+
+    return do_answer, len(instant_messages_buffer), concatenated_message, current_user_data.get("lock")
 
 
 @dp.message_handler(state=UserState.communication)
@@ -128,19 +134,14 @@ async def communication_answer(session: Session, message: types.Message,
                                state: FSMContext, is_image=False, *args, **kwargs):
     tg_user = message.from_user
 
-    do_answer, current_user_data = await instant_messages_collector(state, message)
+    do_answer, instant_messages_buffer_size, concatenated_message, messages_lock = \
+        await instant_messages_collector(state, message)
     if not do_answer:
         return
 
-    messages_lock = current_user_data.get("lock", asyncio.Lock())
     await messages_lock.acquire()
 
     try:  # try-finally block for precise lock release
-
-        # Concat instant messages
-        instant_messages_buffer = current_user_data.get('instant_messages_buffer') or []
-        concatenated_message = "\n\n".join(instant_messages_buffer)
-        await state.update_data({'instant_messages_buffer': []})
 
         # Get or crete user entity
         user = get_or_create_user(session, tg_user)
@@ -160,6 +161,9 @@ async def communication_answer(session: Session, message: types.Message,
                 init_tokens_package(session, user)
                 logger.info(f"Reinitializing '{tg_user.username}' | '{tg_user.id}' tokens package due PRIVILEGED role "
                             f"or free mode enabled.")
+
+        # Get current user in-memory data
+        current_user_data = await state.get_data()
 
         # Personality prompt
         pers = current_user_data.get('pers')
@@ -199,12 +203,12 @@ async def communication_answer(session: Session, message: types.Message,
                                                                   has_image=is_image,
                                                                   query_tokens=query_tokens,
                                                                   time_taken=ms_time,
-                                                                  instant_buffer=len(instant_messages_buffer),
+                                                                  instant_buffer=instant_messages_buffer_size,
                                                                   model=model_config.model_name,
                                                                   executed_at=datetime.datetime.now()))
             tokens_spending(session, tg_user.id, tokens_usage)
 
-        if len(instant_messages_buffer) == 1:
+        if instant_messages_buffer_size == 1:
             sent_message = await message.reply(ai_message)
         else:
             sent_message = await message.answer(ai_message)
@@ -225,12 +229,10 @@ async def communication_answer(session: Session, message: types.Message,
         new_data = await state.get_data()
         if new_data.get('pers') == pers:
             updated_history = history + [{"role": "assistant", "content": ai_message}]
-            await state.update_data(
-                {
+            await state.update_data({
                     'history': updated_history,
                     'prev_tokens_usage': tokens_usage
-                }
-            )
+                })
             logger.debug(f'History of user {tg_user.username}: {updated_history}')
     finally:
         messages_lock.release()

@@ -12,15 +12,15 @@ time_regexp = re.compile(
     r'^((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?$')
 
 
-def safe_copy_dict(old_d: typing.Dict = None):
+def safe_copy_dict(old_d: typing.Dict = None, non_copy_keys: list = None):
     if old_d is None:
         return None
     new_d = {}
     for key, value in old_d.items():
-        try:
-            new_d[key] = copy.deepcopy(value)
-        except TypeError:
+        if non_copy_keys is not None and key in non_copy_keys:
             new_d[key] = value
+        else:
+            new_d[key] = copy.deepcopy(value)
     return new_d
 
 
@@ -68,8 +68,9 @@ class LRUMutableMemoryStorage(BaseStorage):
     async def close(self):
         self.data.cache.clear()
 
-    def __init__(self, max_entries: int):
+    def __init__(self, max_entries: int, non_copy_keys: list = None):
         self.max_entries = max_entries
+        self.non_copy_keys = non_copy_keys
         self.data = LRUCache(capacity=max_entries)
 
     def resolve_address(self, chat, user):
@@ -100,7 +101,7 @@ class LRUMutableMemoryStorage(BaseStorage):
         if user not in self.data[chat]:
             self.data[chat][user] = {'state': None, 'data': {}, 'bucket': {}}
 
-        return safe_copy_dict(self.data[chat][user]['data'])
+        return safe_copy_dict(self.data[chat][user]['data'], self.non_copy_keys)
 
     async def update_data(self, *,
                           chat: typing.Union[str, int, None] = None,
@@ -123,7 +124,7 @@ class LRUMutableMemoryStorage(BaseStorage):
                        user: typing.Union[str, int, None] = None,
                        data: typing.Dict = None):
         chat, user = self.resolve_address(chat=chat, user=user)
-        self.data[chat][user]['data'] = safe_copy_dict(data)
+        self.data[chat][user]['data'] = safe_copy_dict(data, self.non_copy_keys)
         self._cleanup(chat, user)
 
     async def reset_state(self, *,

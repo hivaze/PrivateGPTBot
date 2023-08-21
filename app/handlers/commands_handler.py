@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import datetime
 
+import numpy as np
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from sqlalchemy.orm import Session
@@ -98,7 +99,7 @@ async def ban(session: Session, message: types.Message, state: FSMContext, *args
         await message.answer(**reply_message)
 
 
-@dp.message_handler(commands=["status"], state=UserState.menu)
+@dp.message_handler(commands=["status"], state='*')
 @zero_exception
 @with_session
 async def status(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
@@ -107,7 +108,9 @@ async def status(session: Session, message: types.Message, state: FSMContext, *a
     if check_is_admin(tg_user):
         all_messages = get_all_messages(session)
         today_messages = [m for m in all_messages if m.executed_at.date() == datetime.today().date()]
+        today_unique_users = np.unique([m.user_id for m in today_messages])
         week_messages = [m for m in all_messages if (datetime.today() - m.executed_at).days < 7]
+        week_unique_users = np.unique([m.user_id for m in week_messages])
         all_users = get_all_users(session)
         today_new_users = [user for user in all_users if user.joined_at.date() == datetime.today().date()]
         week_new_users = [user for user in all_users if (datetime.today() - user.joined_at).days < 7]
@@ -116,16 +119,19 @@ async def status(session: Session, message: types.Message, state: FSMContext, *a
                     f'__Users:__\n\n'
                     f'Total users count: {len(all_users)}\n'
                     f'Week new users: {len(week_new_users)}\n'
-                    f'Today new users: {len(today_new_users)}\n\n'
+                    f'Week unique users: {len(week_unique_users)}\n'
+                    f'Today new users: {len(today_new_users)}\n'
+                    f'Today unique users: {len(today_unique_users)}\n\n'
                     f'__Messages:__\n\n'
                     f'Total messages count: {len(all_messages)}\n'
                     f'Week messages count: {len(week_messages)}\n'
-                    f'Today total messages: {len(today_messages)}\n'
-                    f'Average user history size: {get_avg_hist_size_by_user(session)}\n'
-                    f'Average user messages count: {get_avg_messages_by_user(session)}\n\n'
+                    f'Week avg. user messages count: {round(get_avg_messages_by_user(session), 2)}\n'
+                    f'Today messages count: {len(today_messages)}\n'
+                    f'Week avg. user history size: {round(get_avg_hist_size_by_user(session), 2)}\n\n'
                     f'__Tokens:__\n\n'
-                    f'Average user used tokens: {get_avg_tokens_by_user(session)}\n'
-                    f'Average message used tokens: {get_avg_tokens_per_message(session)}'
+                    f'Today total used tokens: {sum([m.used_tokens for m in today_messages])}\n'
+                    f'Week avg. user used tokens: {round(get_avg_tokens_by_user(session), 2)}\n'
+                    f'Week avg. message used tokens: {round(get_avg_tokens_per_message(session), 2)}'
         }
         await message.answer(**reply_message, parse_mode='markdown')
 

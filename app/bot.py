@@ -9,7 +9,7 @@ from app import settings
 from app.utils.general import LRUMutableMemoryStorage
 
 tg_bot = Bot(token=settings.config.TG_BOT_TOKEN)
-memory = LRUMutableMemoryStorage(max_entries=settings.config.bot_max_users_memory)
+memory = LRUMutableMemoryStorage(max_entries=settings.config.bot_max_users_memory, non_copy_keys=['lock'])
 dp = Dispatcher(tg_bot, storage=memory)
 # dp.setup_middleware(LoggingMiddleware())
 

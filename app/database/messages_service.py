@@ -1,4 +1,5 @@
 import typing
+from datetime import datetime, timedelta
 
 from aiogram.types import User
 from sqlalchemy import select
@@ -27,7 +28,9 @@ def get_all_messages(session: Session) -> typing.List[MessageEntity]:
 
 
 def get_avg_hist_size_by_user(session: Session) -> float:
+    last_week = datetime.now() - timedelta(weeks=1)
     subquery = (session.query(MessageEntity.user_id, func.avg(MessageEntity.history_size).label('average_hist_size'))
+                .filter(MessageEntity.executed_at >= last_week)
                 .group_by(MessageEntity.user_id)
                 .subquery())
     average_query = session.query(func.avg(subquery.c.average_hist_size).label('average_between_averages')).scalar()
@@ -35,7 +38,9 @@ def get_avg_hist_size_by_user(session: Session) -> float:
 
 
 def get_avg_tokens_by_user(session: Session) -> float:
+    last_week = datetime.now() - timedelta(weeks=1)
     subquery = (session.query(MessageEntity.user_id, func.sum(MessageEntity.used_tokens).label('average_used_tokens'))
+                .filter(MessageEntity.executed_at >= last_week)
                 .group_by(MessageEntity.user_id)
                 .subquery())
     average_query = session.query(func.avg(subquery.c.average_used_tokens).label('average_between_averages')).scalar()
@@ -43,12 +48,17 @@ def get_avg_tokens_by_user(session: Session) -> float:
 
 
 def get_avg_tokens_per_message(session: Session) -> float:
-    average_query = session.query(func.avg(MessageEntity.used_tokens).label('average_used_tokens')).scalar()
+    last_week = datetime.now() - timedelta(weeks=1)
+    average_query = (session.query(func.avg(MessageEntity.used_tokens).label('average_used_tokens'))
+                     .filter(MessageEntity.executed_at >= last_week)
+                     .scalar())
     return average_query
 
 
 def get_avg_messages_by_user(session: Session) -> float:
+    last_week = datetime.now() - timedelta(weeks=1)
     subquery = (session.query(MessageEntity.user_id, func.count().label('total_messages'))
+                .filter(MessageEntity.executed_at >= last_week)
                 .group_by(MessageEntity.user_id)
                 .subquery())
     average_query = session.query(func.avg(subquery.c.total_messages).label('average_messages')).scalar()
