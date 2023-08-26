@@ -6,6 +6,7 @@ import tempfile
 from PIL import Image
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.exceptions import BadRequest
 from sqlalchemy.orm import Session
 
 from app import settings
@@ -209,7 +210,10 @@ async def communication_answer(session: Session, message: types.Message,
             tokens_spending(session, tg_user.id, tokens_usage)
 
         if instant_messages_buffer_size == 1:
-            sent_message = await message.reply(ai_message)
+            try:
+                sent_message = await message.reply(ai_message)
+            except BadRequest:  # Fix for 'Replied message not found'
+                sent_message = await message.answer(ai_message)
         else:
             sent_message = await message.answer(ai_message)
 

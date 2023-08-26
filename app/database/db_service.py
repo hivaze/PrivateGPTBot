@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 DB_PATH = 'resources/users.db'
 
 engine = create_engine(f'sqlite:///{DB_PATH}', echo=False)  # can be async
-session_factory = sessionmaker(engine, expire_on_commit=False, autoflush=True)
+session_factory = sessionmaker(engine, expire_on_commit=False, autoflush=False)  # Autoflush must be disabled
 Base = declarative_base()
 
 
