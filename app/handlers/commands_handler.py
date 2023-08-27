@@ -33,7 +33,8 @@ async def welcome_user(session: Session, message: types.Message, state: FSMConte
         model_config = get_user_model(user)
 
         if message.get_command() != '/reset':
-            text = settings.messages.welcome.with_access.format(model_name=model_config.model_name)
+            text = settings.messages.welcome.with_access.format(model_name=model_config.model_name,
+                                                                hist_size=model_config.last_messages_count)
             logger.info(f"User '{tg_user.username}' | '{tg_user.id}' with access initialized the bot.")
         else:
             text = settings.messages.welcome.reset
