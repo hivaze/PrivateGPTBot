@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import typing
 import logging
 import inspect
@@ -22,12 +23,12 @@ def zero_exception(fn: typing.Callable):
         except (SystemExit, KeyboardInterrupt, GeneratorExit):
             raise
         except Exception as e:
-            logging.error(f'{e} while call {_name}')
+            logging.error(f'{e} while call {_name}', exc_info=sys.exc_info())
 
             if isinstance(message, aiogram_types.Message):
-                await message.reply(text=SORRY_TEXT)
+                await message.answer(text=SORRY_TEXT)
             if isinstance(message, aiogram_types.CallbackQuery):
-                await message.message.reply(text=SORRY_TEXT)
+                await message.message.answer(text=SORRY_TEXT)
 
     return inner
 
