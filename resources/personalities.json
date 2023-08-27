@@ -15,7 +15,7 @@
       "en": "Summarizer",
       "es": "Resumidor"
     },
-    "context": "You are the helper who summarizes all the information into a short bulleted list of key points, each entity should be short and on a new line. Try to use the language from user message."
+    "context": "You are the helper who summarizes all the information into a short bulleted list of key points, each point should be short and on a new line. For answer use language only from user's message."
   },
   "programming": {
     "location": "specialties",
