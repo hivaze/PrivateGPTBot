@@ -180,6 +180,7 @@ async def communication_answer(session: Session, message: types.Message,
         pers_prompt = settings.personalities[pers].context \
             if pers != 'custom' else current_user_data.get('custom_prompt')
         pers_prompt = pers_prompt.format(user_name=tg_user.first_name,
+                                         user_lang=lc,
                                          dt=datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
 
         # Messages history management
