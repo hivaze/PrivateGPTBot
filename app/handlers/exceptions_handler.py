@@ -7,8 +7,7 @@ import inspect
 from aiogram import types as aiogram_types
 
 from app import settings
-
-SORRY_TEXT = settings.messages.error
+from app.utils.bot_utils import format_language_code
 
 
 def zero_exception(fn: typing.Callable):
@@ -25,10 +24,13 @@ def zero_exception(fn: typing.Callable):
         except Exception as e:
             logging.error(f'{e} while call {_name}', exc_info=sys.exc_info())
 
+            tg_user = message.from_user
+            lc = format_language_code(tg_user.language_code)
+
             if isinstance(message, aiogram_types.Message):
-                await message.answer(text=SORRY_TEXT)
+                await message.answer(text=settings.messages.error[lc])
             if isinstance(message, aiogram_types.CallbackQuery):
-                await message.message.answer(text=SORRY_TEXT)
+                await message.message.answer(text=settings.messages.error[lc])
 
     return inner
 

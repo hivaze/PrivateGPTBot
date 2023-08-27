@@ -1,28 +1,92 @@
 {
   "welcome": {
-    "with_access": "Привет! Этот бот разработан @hivaze и модерируется @Lroz3.\nВ его основе лежат несколько нейросетей, основная - ChatGPT от OpenAI.\n\nДля использования просто выбери нужный режим и можешь общаться, картинки шли не как файлы! Бот умеет понимать пересланные сообщения из чатов или каналов.\n\nВ ходе общения бот будет помнить только последние {hist_size} сообщений.\n\nЯзыковая нейросеть для тебя: {model_name}.\nВсе сообщения нигде не сохраняются, их никто не увидит!\n\nВесь код расположен тут - https://github.com/hivaze/PrivateGPTBot",
-    "no_access": "К сожалению, тебе нельзя пользоваться этим ботом :(\n\nНо ты можешь поднять свой инстанс, код расположен тут - https://github.com/hivaze/PrivateGPTBot",
-    "reset": "Выбирай нового персонажа, история общения со старым забыта!"
+    "with_access": {
+      "ru": "Привет! Этот бот разработан @hivaze и модерируется @Lroz3.\nВ его основе лежат несколько нейросетей, основная - ChatGPT от OpenAI.\n\nДля использования просто выбери нужный режим и можешь общаться, картинки шли не как файлы. Бот умеет понимать пересланные сообщения из чатов или каналов.\n\nВ ходе общения бот будет помнить только последние {hist_size} сообщений.\n\nЯзыковая нейросеть для тебя: {model_name}.\nВсе сообщения нигде не сохраняются, их никто не увидит!\n\nВесь код расположен тут - https://github.com/hivaze/PrivateGPTBot",
+      "en": "Hello! This bot was developed by @hivaze and moderated by @Lroz3.\nIt is based on several neural networks, with the main one being ChatGPT from OpenAI.\n\nTo use it, simply choose the desired mode and start communicating. Please note that images cannot be sent as files. The bot can understand forwarded messages from chats or channels.\n\nDuring the conversation, the bot will only remember the last {hist_size} messages.\n\nThe language model for you is: {model_name}.\nAll messages are not saved anywhere and no one will see them!\n\nThe entire code is located here - https://github.com/hivaze/PrivateGPTBot",
+      "es": "¡Hola! Este bot fue desarrollado por @hivaze y moderado por @Lroz3.\nEstá basado en varias redes neuronales, siendo la principal ChatGPT de OpenAI.\n\nPara usarlo, simplemente elige el modo deseado y comienza a comunicarte. ¡Ten en cuenta que las imágenes no se pueden enviar como archivos. El bot puede entender mensajes reenviados desde chats o canales.\n\nDurante la conversación, el bot solo recordará los últimos {hist_size} mensajes.\n\nEl modelo de lenguaje para ti es: {model_name}.\n¡Todos los mensajes no se guardan en ningún lugar y nadie los verá!\n\nTodo el código se encuentra aquí - https://github.com/hivaze/PrivateGPTBot"
+    },
+    "no_access": {
+      "ru": "К сожалению, тебе нельзя пользоваться этим ботом :(\n\nНо ты можешь поднять свой инстанс, код расположен тут - https://github.com/hivaze/PrivateGPTBot",
+      "en": "Unfortunately, you are not allowed to use this bot :(\n\nBut you can set up your own instance, the code is located here - https://github.com/hivaze/PrivateGPTBot",
+      "es": "Lamentablemente, no tienes permiso para usar este bot :(\n\nPero puedes configurar tu propia instancia, el código se encuentra aquí - https://github.com/hivaze/PrivateGPTBot"
+    },
+    "reset": {
+      "ru": "Выбирай нового персонажа, история общения со старым забыта!",
+      "en": "Choose a new character, the conversation history with the old one is forgotten!",
+      "es": "Elige un nuevo personaje, ¡se olvida la historia de conversación con el antiguo!"
+    }
   },
   "tokens": {
-    "notion": "Так как размер истории сообщений довольно большой, из истории сообщений было удалено {removed_tokens} токенов, но вы вероятно этого не заметите, присылайте текста короче.",
-    "tokens_count": "Размер вашего сообщения: {message_size}\nТокенов в истории: {tokens_usage}"
+    "notion": {
+      "ru": "Так как размер истории сообщений довольно большой, из истории сообщений было удалено {removed_tokens} токенов, но вы вероятно этого не заметите, присылайте текста короче.",
+      "en": "Since the size of the message history is quite large, {removed_tokens} tokens have been removed from the history, but you probably won't notice it, so please send shorter texts.",
+      "es": "Dado que el tamaño del historial de mensajes es bastante grande, se han eliminado {removed_tokens} tokens del historial, pero probablemente no lo notarás, así que por favor envía textos más cortos."
+    },
+    "tokens_count": {
+      "ru": "Размер вашего сообщения: {message_size}\nТокенов в истории: {tokens_usage}",
+      "en": "Size of your message: {message_size}\nTokens used in history: {tokens_usage}",
+      "es": "Tamaño de tu mensaje: {message_size}\nTokens utilizados en el historial: {tokens_usage}"
+    }
   },
   "pers_selection": {
-    "go": "Теперь можешь просто писать, спрашивать что угодно и тд. Для перезапуска - /start или /reset. Удачи!",
-    "mistake": "Ты должен выбрать персонажа для общения.\nУказанного персонажа не найдено, если считаешь это ошибкой пиши @hivaze или @Lroz3",
-    "info": "Меню выбора персонажей"
+    "go": {
+      "ru": "Теперь можешь просто писать, спрашивать что угодно и тд. Для перезапуска - /start или /reset. Удачи!",
+      "en": "Now you can simply write, ask anything, etc. To restart - /start or /reset. Good luck!",
+      "es": "Ahora puedes simplemente escribir, preguntar cualquier cosa, etc. Para reiniciar - /start o /reset. ¡Buena suerte!"
+    },
+    "mistake": {
+      "ru": "Ты должен выбрать персонажа для общения.\nУказанного персонажа не найдено, если считаешь это ошибкой пиши @hivaze или @Lroz3",
+      "en": "You need to choose a character to communicate with.\nThe specified character was not found. If you think this is a mistake, please contact @hivaze or @Lroz3.",
+      "es": "Debes elegir un personaje con quien comunicarte.\nNo se encontró el personaje especificado. Si crees que esto es un error, por favor contacta a @hivaze o @Lroz3."
+    },
+    "info": {
+      "ru": "Меню выбора персонажей",
+      "en": "Character selection menu",
+      "es": "Menú de selección de personajes"
+    }
   },
-  "image_forward": "Поддержки пересланных картинок на данный момент нет, будет использоваться только текст.",
-  "bot_reboot": "Вероятно ваша сессия завершилась или бот был перезагружен. Снова выбери персонажа.",
-  "error": "[ERROR] Прости, кажется что-то сломалось :(\nПопробуй уменьшить свое последнее сообщение, если не поможет используй /reset или обратись к @hivaze.",
+  "image_forward": {
+    "ru": "Поддержки пересланных картинок на данный момент нет, будет использоваться только текст.",
+    "en": "Image forwarding is not supported at the moment, only text will be used.",
+    "es": "No se admite el reenvío de imágenes en este momento, solo se utilizará texto."
+  },
+  "bot_reboot": {
+    "ru": "Вероятно ваша сессия завершилась или бот был перезагружен. Снова выбери персонажа.",
+    "en": "Your session has likely ended or the bot has been rebooted. Please choose a character again.",
+    "es": "Tu sesión probablemente ha finalizado o el bot se ha reiniciado. Por favor, elige un personaje nuevamente."
+  },
+  "error": {
+    "ru": "[ERROR] Прости, кажется что-то сломалось :(\nПопробуй уменьшить свое последнее сообщение, если не поможет используй /reset или обратись к @hivaze.",
+    "en": "[ERROR] Sorry, something went wrong :(\nTry shortening your last message, if that doesn't help, use /reset or contact @hivaze.",
+    "es": "[ERROR] Lo siento, algo salió mal :(\nIntenta acortar tu último mensaje, si eso no ayuda, usa /reset o contacta a @hivaze."
+  },
   "specialties": {
-    "button": "Другие Специальности",
-    "back_button": "Назад",
-    "info": "Тут другие персонажи. Ты так же можешь создать своего выбрав 'Свой персонаж'"
+    "button": {
+      "ru": "Другие Специальности",
+      "en": "Other Specialties",
+      "es": "Otras Especialidades"
+    },
+    "back_button": {
+      "ru": "Назад",
+      "en": "Back",
+      "es": "Volver"
+    },
+    "info": {
+      "ru": "Тут другие персонажи. Ты так же можешь создать своего выбрав 'Свой персонаж'",
+      "en": "Here are other characters. You can also create your own by choosing 'Custom Personality'.",
+      "es": "Aquí están otros personajes. También puedes crear el tuyo propio seleccionando 'Personalidad Personalizada'."
+    }
   },
   "custom_personality": {
-    "button": "Свой персонаж",
-    "info": "Ты должен создать своего персонажа, для этого в следующем сообщении напиши боту как он должен себя вести и что уметь. Например, можешь научить бота играть в ролевую игру\n\nВажно: Нет способа как это правильно сделать, просто поэксперементируй. Для отмены /reset"
+    "button": {
+      "ru": "Свой персонаж",
+      "en": "Custom Personality",
+      "es": "Personalidad Personalizada"
+    },
+    "info": {
+      "ru": "Ты должен создать своего персонажа, для этого в следующем сообщении напиши боту как он должен себя вести и что уметь. Например, можешь научить бота играть в ролевую игру\n\nВажно: Нет способа как это правильно сделать, просто поэксперементируй. Для отмены /reset",
+      "en": "You need to create your own character. In the next message, write to the bot how it should behave and what it should be able to do. For example, you can teach the bot to play a role-playing game.\n\nImportant: There is no correct way to do this, just experiment. To cancel, use /reset.",
+      "es": "Debes crear tu propio personaje. En el próximo mensaje, escribe al bot cómo debería comportarse y qué debería ser capaz de hacer. Por ejemplo, puedes enseñar al bot a jugar un juego de rol.\n\nImportante: No hay una forma correcta de hacerlo, simplemente experimenta. Para cancelar, usa /reset."
+    }
   }
 }

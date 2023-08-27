@@ -19,7 +19,8 @@ from app.database.users_service import UserState, reset_user_state, check_user_a
 from app.handlers.exceptions_handler import zero_exception
 from app.models_api.blip_captions_model import get_images_captions
 from app.models_api.open_ai_client import generate_message, truncate_user_history, count_tokens
-from app.utils.bot_utils import global_message, build_menu_markup, build_specials_markup, no_access_message
+from app.utils.bot_utils import global_message, build_menu_markup, build_specials_markup, no_access_message, \
+    format_language_code
 from app.utils.general import TypingBlock
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,7 @@ DEFAULT_MESSAGE_FORMAT = "{message}"
 @with_session
 async def admin_message(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
+    lc = format_language_code(tg_user.language_code)
 
     await message.answer('Now your message will be sent to all known users...')
 
@@ -43,8 +45,8 @@ async def admin_message(session: Session, message: types.Message, state: FSMCont
     await reset_user_state(session, tg_user, state)
 
     reply_message = {
-        'text': settings.messages.welcome.reset,
-        'reply_markup': build_menu_markup(tg_user.username)
+        'text': settings.messages.welcome.reset[lc],
+        'reply_markup': build_menu_markup(tg_user)
     }
     await message.answer(**reply_message)
 
@@ -52,9 +54,12 @@ async def admin_message(session: Session, message: types.Message, state: FSMCont
 @dp.message_handler(state=UserState.custom_pers_setup)
 @zero_exception
 async def custom_personality(message: types.Message, state: FSMContext, *args, **kwargs):
+    tg_user = message.from_user
+    lc = format_language_code(tg_user.language_code)
+
     await state.update_data({'custom_prompt': message.text.strip(), 'lock': asyncio.Lock()})
     await UserState.communication.set()
-    await message.answer(settings.messages.pers_selection.go)
+    await message.answer(settings.messages.pers_selection.go[lc])
 
 
 @dp.message_handler(state=None)
@@ -62,9 +67,11 @@ async def custom_personality(message: types.Message, state: FSMContext, *args, *
 @with_session
 async def default_answer(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
+    lc = format_language_code(tg_user.language_code)
+
     if check_user_access(session, tg_user):
         await reset_user_state(session, tg_user, state)
-        await message.answer(settings.messages.bot_reboot,
+        await message.answer(settings.messages.bot_reboot[lc],
                              reply_markup=build_menu_markup(tg_user),
                              disable_notification=True)
     else:
@@ -75,30 +82,31 @@ async def default_answer(session: Session, message: types.Message, state: FSMCon
 @zero_exception
 async def pers_selection_answer(message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
+    lc = format_language_code(tg_user.language_code)
 
     text = message.text.strip()
     all_pers = list(settings.personalities.items())
-    found = list(filter(lambda x: x[1].name == text, all_pers))
+    found = list(filter(lambda x: x[1].name[lc] == text, all_pers))
     if len(found) == 1:
-        await message.answer(settings.messages.pers_selection.go,
+        await message.answer(settings.messages.pers_selection.go[lc],
                              reply_markup=types.ReplyKeyboardRemove())
         await state.update_data({'pers': found[0][0], "lock": asyncio.Lock()})
         await UserState.communication.set()
-    elif text == settings.messages.custom_personality.button:
+    elif text == settings.messages.custom_personality.button[lc]:
         await state.update_data({'pers': 'custom'})
         await UserState.custom_pers_setup.set()
-        await message.answer(settings.messages.custom_personality.info,
+        await message.answer(settings.messages.custom_personality.info[lc],
                              reply_markup=types.ReplyKeyboardRemove())
-    elif text == settings.messages.specialties.button:
-        await message.answer(settings.messages.specialties.info,
+    elif text == settings.messages.specialties.button[lc]:
+        await message.answer(settings.messages.specialties.info[lc],
                              reply_markup=build_specials_markup(tg_user))
         await message.delete()
-    elif text == settings.messages.specialties.back_button:
-        await message.answer(settings.messages.pers_selection.info,
+    elif text == settings.messages.specialties.back_button[lc]:
+        await message.answer(settings.messages.pers_selection.info[lc],
                              reply_markup=build_menu_markup(tg_user))
         await message.delete()
     else:
-        await message.answer(settings.messages.pers_selection.mistake,
+        await message.answer(settings.messages.pers_selection.mistake[lc],
                              reply_markup=build_menu_markup(tg_user))
 
 
@@ -134,6 +142,7 @@ async def instant_messages_collector(state, message):
 async def communication_answer(session: Session, message: types.Message,
                                state: FSMContext, is_image=False, *args, **kwargs):
     tg_user = message.from_user
+    lc = format_language_code(tg_user.language_code)
 
     do_answer, instant_messages_buffer_size, concatenated_message, messages_lock = \
         await instant_messages_collector(state, message)
@@ -218,12 +227,12 @@ async def communication_answer(session: Session, message: types.Message,
             sent_message = await message.answer(ai_message)
 
         if removed_tokens > 0:
-            await sent_message.reply(settings.messages.tokens.notion.format(removed_tokens=removed_tokens),
+            await sent_message.reply(settings.messages.tokens.notion[lc].format(removed_tokens=removed_tokens),
                                      disable_notification=True)
 
         if settings.config.append_tokens_count:
-            await sent_message.reply(settings.messages.tokens.tokens_count.format(message_size=query_tokens,
-                                                                                  tokens_usage=tokens_usage),
+            await sent_message.reply(settings.messages.tokens.tokens_count[lc].format(message_size=query_tokens,
+                                                                                      tokens_usage=tokens_usage),
                                      disable_notification=True)
 
         logger.info(f"Another reply to user '{tg_user.username}' | '{tg_user.id}' sent,"
@@ -234,9 +243,9 @@ async def communication_answer(session: Session, message: types.Message,
         if new_data.get('pers') == pers:
             updated_history = history + [{"role": "assistant", "content": ai_message}]
             await state.update_data({
-                    'history': updated_history,
-                    'prev_tokens_usage': tokens_usage
-                })
+                'history': updated_history,
+                'prev_tokens_usage': tokens_usage
+            })
             logger.debug(f'History of user {tg_user.username}: {updated_history}')
     finally:
         messages_lock.release()
@@ -247,6 +256,7 @@ async def communication_answer(session: Session, message: types.Message,
 @with_session
 async def photo_answer(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
+    lc = format_language_code(tg_user.language_code)
 
     current_user_data = await state.get_data()
     messages_lock = current_user_data.get("lock", asyncio.Lock())
@@ -259,7 +269,7 @@ async def photo_answer(session: Session, message: types.Message, state: FSMConte
         return
 
     if message.is_forward():
-        await message.reply(settings.messages.image_forward)
+        await message.reply(settings.messages.image_forward[lc])
 
         message.text = message.caption
         await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=False))

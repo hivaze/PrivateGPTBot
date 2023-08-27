@@ -38,17 +38,23 @@ async def global_message(session: Session, text: str, do_markdown: bool = False)
 
 
 def build_menu_markup(tg_user: User):
-    markup = [types.KeyboardButton(v.name) for k, v in settings.personalities.items()
+    lc = format_language_code(tg_user.language_code)
+    markup = [types.KeyboardButton(v.name[lc]) for k, v in settings.personalities.items()
               if v.location == 'main']
     markup = [markup[i:i + 2] for i in range(0, len(markup), 2)]
-    markup = markup + [[types.KeyboardButton(settings.messages.specialties.button)]]
+    markup = markup + [[types.KeyboardButton(settings.messages.specialties.button[lc])]]
     return types.ReplyKeyboardMarkup(keyboard=markup, resize_keyboard=True)
 
 
+def format_language_code(language_code: str):
+    return language_code if language_code in ['ru', 'en', 'es'] else 'en'
+
+
 def build_specials_markup(tg_user: User):
-    markup = [types.KeyboardButton(v.name) for k, v in settings.personalities.items()
+    lc = format_language_code(tg_user.language_code)
+    markup = [types.KeyboardButton(v.name[lc]) for k, v in settings.personalities.items()
               if v.location == 'specialties']
     markup = [markup[i:i + 2] for i in range(0, len(markup), 2)]
-    markup = markup + [[types.KeyboardButton(settings.messages.custom_personality.button),
-                        types.KeyboardButton(settings.messages.specialties.back_button)]]
+    markup = markup + [[types.KeyboardButton(settings.messages.custom_personality.button[lc]),
+                        types.KeyboardButton(settings.messages.specialties.back_button[lc])]]
     return types.ReplyKeyboardMarkup(keyboard=markup, resize_keyboard=True)

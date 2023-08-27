@@ -51,7 +51,7 @@ class BotConfig(BaseModel):
 
 class PersonalityConfig(BaseModel):
     location: str
-    name: str
+    name: dict
     context: str
 
 
@@ -66,40 +66,40 @@ class TokensPackageConfig(BaseModel):
 ##### Messages
 
 class WelcomeText(BaseModel):
-    with_access: str
-    no_access: str
-    reset: str
+    with_access: dict
+    no_access: dict
+    reset: dict
 
 
 class TokensText(BaseModel):
-    notion: str
-    tokens_count: str
+    notion: dict
+    tokens_count: dict
 
 
 class PersSelectionText(BaseModel):
-    go: str
-    mistake: str
-    info: str
+    go: dict
+    mistake: dict
+    info: dict
 
 
 class SpecialtiesText(BaseModel):
-    button: str
-    back_button: str
-    info: str
+    button: dict
+    back_button: dict
+    info: dict
 
 
 class CustomPersonalityText(BaseModel):
-    button: str
-    info: str
+    button: dict
+    info: dict
 
 
 class MessagesConfig(BaseModel):
     welcome: WelcomeText
     tokens: TokensText
     pers_selection: PersSelectionText
-    bot_reboot: str
-    error: str
-    image_forward: str
+    bot_reboot: dict
+    error: dict
+    image_forward: dict
     specialties: SpecialtiesText
     custom_personality: CustomPersonalityText
 

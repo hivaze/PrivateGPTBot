@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.bot import dp
-from app.utils.bot_utils import build_menu_markup, send_db
+from app.utils.bot_utils import build_menu_markup, send_db, format_language_code
 from app.database.db_service import with_session
 from app.database.messages_service import get_all_messages, get_avg_hist_size_by_user, get_avg_tokens_by_user, \
     get_avg_tokens_per_message, get_avg_messages_by_user
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @with_session
 async def welcome_user(session: Session, message: types.Message, state: FSMContext, *args, **kwargs):
     tg_user = message.from_user
+    lc = format_language_code(tg_user.language_code)
 
     if check_user_access(session, tg_user):
 
@@ -33,20 +34,20 @@ async def welcome_user(session: Session, message: types.Message, state: FSMConte
         model_config = get_user_model(user)
 
         if message.get_command() != '/reset':
-            text = settings.messages.welcome.with_access.format(model_name=model_config.model_name,
+            text = settings.messages.welcome.with_access[lc].format(model_name=model_config.model_name,
                                                                 hist_size=model_config.last_messages_count)
             logger.info(f"User '{tg_user.username}' | '{tg_user.id}' with access initialized the bot.")
         else:
-            text = settings.messages.welcome.reset
+            text = settings.messages.welcome.reset[lc]
             logger.info(f"User '{tg_user.username}' | '{tg_user.id}' with access reset the bot.")
 
         reply_message = {
             'text': text,
-            'reply_markup': build_menu_markup(tg_user.username)
+            'reply_markup': build_menu_markup(tg_user)
         }
     else:
         reply_message = {
-            'text': settings.messages.welcome.no_access
+            'text': settings.messages.welcome.no_access[lc]
         }
         logger.warning(f"User '{tg_user.username}' | '{tg_user.id}' without access tries to use the bot!")
 
