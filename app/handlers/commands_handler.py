@@ -145,6 +145,7 @@ async def reload(message: types.Message, state: FSMContext, *args, **kwargs):
     if check_is_admin(tg_user):
         settings.load()
         reply_message = {
-            'text': 'Configs reloaded. Main config:\n\n' + str(settings.config)
+            'text': 'Configs reloaded.\n\nModels config:\n' + str(settings.config.models) +
+                    '\n\nMessages config:\n' + str(settings.messages)
         }
         await message.answer(**reply_message)
