@@ -1,11 +1,31 @@
 version: "3.9"
+
+networks:
+  net:
+    driver: bridge
+
 services:
 
-  main:
+  chroma_server:
+    image: ghcr.io/chroma-core/chroma:latest
+    volumes:
+      - index_data:/chroma/.chroma/index
+    ports:
+      - "8003:8000"
+    networks:
+      - net
+
+  tg_bot:
     container_name: PrivateGPTBot
     build: .
+    depends_on:
+      - postgres
+      - chroma_server
     volumes:
+      - ./app:/bot/app
       - ./resources:/bot/resources
+    networks:
+      - net
 
   postgres:
     image: postgres:14.1-alpine
@@ -15,9 +35,14 @@ services:
       POSTGRES_DB: "app_db"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     ports:
-      - "5432:5432"
+      - "54312:5432"
     volumes:
       - bot-data:/var/lib/postgresql/data
+    networks:
+      - net
 
 volumes:
   bot-data:
+    driver: local
+  index_data:
+      driver: local

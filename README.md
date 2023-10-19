@@ -1,95 +1,67 @@
-## Приватный телеграм бот на основе ChatGPT
+## Smart Telegram Bot based on ChatGPT
 
-Бот с несколькими персонажами для доступа по вашему OpenAI ключу к API gpt-3.5 и gpt-4 (chatgpt). 
-Умеет воспринимать картинки с помощью BLIP (но не документы, по крайней мере не все).
+An asynchronous bot with multiple characters for accessing the gpt-3.5 and gpt-4 API (chatgpt) via your OpenAI key. It can work with documents and the internet, and interprets images using BLIP.
 
-### Возможности
-- Имеет вайтлист пользователей для ограниченного доступа, но может работать в глобальном режиме, так же имеет роли.
-- Имеет несколько настраиваемых персонажей (system prompt в ChatGPT)
-- Умеет работать с разными моделями в зависимости от роли пользователя (gpt-3.5, gpt-4)
-- Умеет работать с длинной историей сообщений и большими сообщениями,
-за счет адаптивного урезания истории, чтобы влезли новые сообщения
-- Умеет учитывать имя пользователя и текущее время и дату
-- Умеет понимать пересланные сообщения (можно переслать последние новости и спрсоить что было важного)
-- Умеет работать с картинками. "Шутник" умеет создавать мемы по ним (примеры ниже)
-- Все сообщения можно изменить, чтобы было удобнее запускать из коробки
-- Можно запустить в Docker
+### Bot's address
+t.me/personalized_ai_bot - you can try it right now if the bot is in global mode.
 
-Используемые фреймворки: `aiogram`, `SQLAlchemy`, `openai`, `transformers` и `torch`. \
-Полный список зависимостей (7 штук) в `requirements.txt`.
+### Features
+- **Full Asynchronous**: With the help of aiogram, the bot is fully asynchronous and actively uses multithreading.
+- **Function-calling support**: Working with any number of documents, as well as website scraping.
+- **Multilingual interface**: Automatic adaptation of the interface to the user's language.
+- **Adaptive truncation of history**: The bot is capable of adaptively processing and truncating the history of messages according to the model's context size.
+- **Image processing**: The bot can perceive and process images.
+- **Message customization**: The bot provides the opportunity for full customization of all messages.
+- **Character creation**: Ability to create a unique character within a session.
+- **System of tokens packages**: Ability to control tokens consumption via tokens packages with lifetime and different levels. 
+- **Relational database**: Use of SQLite/Postgres for user data storage and management.
+- **Vector database**: Use of ChromaDB for storing user documents.
+- **Role system and access control**: Ability to control access to various models, including gpt3.5/gpt4.
+- **Processing of forwarded messages**: Understanding of forwarded messages from other users or channels.
+- **Consideration of user information**: The user's information, as well as the current time and date, are factored in when forming responses.
+- **Automatic model selection**: Automatically switches to a model with a 16k context if the context exceeds 4k tokens.
+- **Feedback collection**: With a button in the menu, users can easily contact administrators.
+- **LRU-based sessions**: The bot stores active data (sessions) only for the latest N users.
+- **Message regeneration**: Ability to regenerate messages using different models.
+- **Integrated power of langchain components**: The bot does not rely on agents from there, but uses langchain to work with a large number of document types.
+- **Docker-native**: The project is designed to run in Docker, but it can also be used without it.
 
-Все конфиги находятся в `resources/`.
+Used frameworks: `aiogram`, `langchain`, `SQLAlchemy`, `openai`, `transformers` and `torch`. Full list of dependencies in `requirements.txt`.
 
-Запуск после установки зависимостей и настройки просто: `python main.py`.
+All configs are in `resources/`.
+
+Running after installing dependencies and setting up is simple: `python main.py`.
 
 ### TODO Roadmap
-- ✔️ Адаптивное урезание истории
-- ✔️ Добавление возможности воспринимать картинки (BLIP)
-- ✔️ Возможность полной кастомизации всех сообщений
-- ✔️ Возможность создавать своего персонажа в рамках сессии
-- ✔️ Реляционная БД пользователей (SQLite)
-- ✔️ Система ролей и доступ к разным моделям (gpt3.5/gpt4)
-- ✔️ Понимание пересланых сообщений от других пользователей или каналов
-- ✔️ Учет информации о пользователе и текущего времени и даты
-- ⏳ Система напоминаний / учета интересов пользователя
-- ⏳ Непассивное общение (отправка сообщений-тригеров время от времени)
-- ⏳ Возможность генерировать картинки
-- ⏳ Возможность понимать голосовые сообщения
+- ✔️ Adaptive truncation of history
+- ✔️ Addition of image perception ability (BLIP)
+- ✔️ Ability to fully customize all messages
+- ✔️ Ability to create a character within a session
+- ✔️ Relational user DB (SQLite)
+- ✔️ Automatic multi-language interface
+- ✔️ System of roles and access to different models (gpt3.5/gpt4)
+- ✔️ Understanding forwarded messages from other users or channels
+- ✔️ Consideration of user info in the prompt and current time and date
+- ✔️ Refactoring to add langchain and new features
+- ✔️ Ability to regenerate messages with different models
+- ✔️ Revamping of history truncation mechanism (deleting whole messages)
+- ✔️ Support for automatic model detection according to context size
+- ✔️ User settings in inline keyboard
+- ✔️ Full support for Docker, ChromaDB and Postgres
+- ✔️ Function-calling support (Working with any number of documents, Website scraping)
+- ✔️ Thorough token package, usage limit
+- ⏳ Reminder system / user interest tracking
+- ⏳ Non-passive conversation (sending trigger messages from time to time)
+- ⏳ Ability to understand voice messages
+- ⏳ Ability to generate images
+- ⏳ Ability to answer with voice messages
 
-### После /start и изначальные персонажи
+### Configuration
 
-Персонажи настраиваются в `resources/personalities.json` \
-Некоторые сообщения можно поменять в `resources/messages.json`
+The main configuration is described in `resources/config.json` \
+Characters are configured in `resources/personalities.json` \
+All messages can be changed in `resources/messages.json`
 
-![after_start.png](docs%2Fafter_start.png)
+### DB Schema
 
-### Основная конфигурация
-
-Выполнена в виде json файла, находится в `resources/config.json` 
-
-```
-{
-  "OPENAI_KEY": "OPENAI_KEY",
-  "TG_BOT_TOKEN": "TG_BOT_TOKEN",
-  "last_messages_count": 8, <- use only 8 last message to save tokens
-  "global_mode": false, <- will disable allowed_users section
-  "allowed_users": [
-    "hivaze"
-  ],
-  "append_tokens_count": false,
-  "openai_api_retries": 3,
-  "blip": {
-    "use_large": true, <- use "Salesforce/blip-image-captioning-large" model or base
-    "device": "cpu"
-  },
-  "blip_gpt_prompts": { <- prompts for GPT and BLIP connection
-    "joker": "Create a joke like a meme about the image, it shows: {image_caption}. Try to be brief and post-ironic. Try to avoid starting with 'when you'. Используй русский язык.",
-    "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Используй русский язык.",
-    "caption_message": "{prompt} В дополнение к картинке: {message}"
-  },
-  "generation_params": { <- params from OpenAI API
-    "model": "gpt-3.5-turbo",
-    "temperature": 0.8,
-    "presence_penalty": 0.0,
-    "max_tokens": 896,
-    "n": 1,
-    "top_p": 0.9
-  }
-}
-```
-
-### Пример работы шутника
-
-Шутник старается шутить про все что угодно. Кроме того он умеет воспринимать картинки за счет BLIP и последующего перефраза описания картинки ChatGPT
-
-![joker_example.png](docs%2Fjoker_example.png)
-
-![image_joker_example_2.png](docs%2Fimage_joker_example_2.png)
-
-![image_joker_example_1.png](docs%2Fimage_joker_example_1.png)
-
-### Вид из терминала
-
-Сообщения не логируются!
-
-![terminal_view.png](docs%2Fterminal_view.png)
+![Database Arch](docs/db_schema.png)

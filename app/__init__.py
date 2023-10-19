@@ -9,8 +9,6 @@ from app.settings import BotSettings
 
 settings = BotSettings()
 
-import app.handlers
-
 Path('logs/').mkdir(exist_ok=True)
 
 file_name = os.path.join('logs', time.strftime("%Y-%m-%d-%H-%M-%S") + '.log')
@@ -24,3 +22,6 @@ file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
 
 logging.basicConfig(level=logging.INFO, handlers=[stream_handler, file_handler])  # change level to DEBUG if needed
+
+import app.database
+import app.handlers

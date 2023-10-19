@@ -10,6 +10,11 @@ logger = logging.getLogger(__name__)
 ##### Main configuration
 
 
+class DocumentsConfig(BaseModel):
+    summary_blocks: int
+    search_best_k: int
+
+
 class BlipConfig(BaseModel):
     use_large: bool
     device: str
@@ -21,32 +26,50 @@ class BlipGptPrompts(BaseModel):
     caption_message: str
 
 
+class EmbeddingsModelConfig(BaseModel):
+    model_name: str
+    max_retries: int
+    embedding_ctx_length: int
+
+
 class ModelConfig(BaseModel):
-    last_messages_count: int
+    type: str
     max_context_size: int
     model_name: str
+    tokens_scale: float
+    generation_params: dict
+
+
+class TokensPackagesConfig(BaseModel):
+    by_default: str
+    as_first: str
 
 
 class ModelsConfig(BaseModel):
-    default: ModelConfig
-    privileged: ModelConfig
+    small_context: ModelConfig
+    long_context: ModelConfig
+    superior: ModelConfig
 
 
 class BotConfig(BaseModel):
     OPENAI_KEY: str
     TG_BOT_TOKEN: str
+    embeddings_model: EmbeddingsModelConfig
     models: ModelsConfig
+    last_messages_count: int
     global_mode: bool
     free_mode: bool
+    tokens_packages: TokensPackagesConfig
     admins: List[str]
     bot_max_users_memory: int
     instant_messages_waiting: int
-    white_list_users: List[str]
     append_tokens_count: bool
     openai_api_retries: int
+    documents: DocumentsConfig
     blip: BlipConfig
     blip_gpt_prompts: BlipGptPrompts
-    generation_params: dict
+
+##### Personalities
 
 
 class PersonalityConfig(BaseModel):
@@ -59,49 +82,136 @@ class PersonalityConfig(BaseModel):
 
 
 class TokensPackageConfig(BaseModel):
-    amount: int
+    level: int
+    long_context: bool
+    superior_model: bool
+    use_functions: bool
+    use_superior_as_default: bool
+    tokens: int
+    price: int
     duration: str
 
 
 ##### Messages
 
-class WelcomeText(BaseModel):
-    with_access: dict
-    no_access: dict
-    reset: dict
+class Welcome(BaseModel):
+    with_access: Dict[str, str]
+    no_access: Dict[str, str]
 
 
-class TokensText(BaseModel):
-    notion: dict
-    tokens_count: dict
+class Session(BaseModel):
+    zero_state: Dict[str, str]
+    end: Dict[str, str]
 
 
-class PersSelectionText(BaseModel):
-    go: dict
-    mistake: dict
-    info: dict
+class Documents(BaseModel):
+    not_allowed: Dict[str, str]
+    not_supported: Dict[str, str]
+    loading: Dict[str, str]
+    loaded: Dict[str, str]
 
 
-class SpecialtiesText(BaseModel):
-    button: dict
-    back_button: dict
-    info: dict
+class MainMenu(BaseModel):
+    info: Dict[str, str]
+    mistake: Dict[str, str]
+    about: Dict[str, str]
+    settings: Dict[str, str]
+    feedback: Dict[str, str]
+    specialities: Dict[str, str]
 
 
-class CustomPersonalityText(BaseModel):
-    button: dict
-    info: dict
+class SettingsItemState(BaseModel):
+    turn_on: Dict[str, str]
+    turn_off: Dict[str, str]
+
+
+class SettingsMenu(BaseModel):
+    info: Dict[str, str]
+    cant_use: Dict[str, str]
+    allow_global_messages: SettingsItemState
+    reactions: SettingsItemState
+    tokens_info: SettingsItemState
+    use_superior_by_default: SettingsItemState
+
+
+class SpecialtiesMenu(BaseModel):
+    info: Dict[str, str]
+    back: Dict[str, str]
+
+
+class Feedback(BaseModel):
+    info: Dict[str, str]
+    got: Dict[str, str]
+    too_short: Dict[str, str]
+
+
+class Reactions(BaseModel):
+    good: Dict[str, str]
+    bad: Dict[str, str]
+    liked: Dict[str, str]
+    disliked: Dict[str, str]
+
+
+class RedoModels(BaseModel):
+    default: Dict[str, str]
+    superior: Dict[str, str]
+
+
+class Redo(BaseModel):
+    default: Dict[str, str]
+    superior: Dict[str, str]
+    not_allowed: Dict[str, str]
+    generating: RedoModels
+    error: Dict[str, str]
+
+
+class CustomPersonality(BaseModel):
+    button: Dict[str, str]
+    info: Dict[str, str]
+    too_short: Dict[str, str]
+
+
+class Tokens(BaseModel):
+    out_of_tokens: Dict[str, str]
+    reset: Dict[str, str]
+    tokens_count: Dict[str, str]
+    running_out: Dict[str, str]
+    granted: Dict[str, str]
+
+
+class PriceList(BaseModel):
+    info: Dict[str, str]
+    package_info: Dict[str, str]
+
+
+class Confirmation(BaseModel):
+    yes: Dict[str, str]
+    no: Dict[str, str]
 
 
 class MessagesConfig(BaseModel):
-    welcome: WelcomeText
-    tokens: TokensText
-    pers_selection: PersSelectionText
-    bot_reboot: dict
-    error: dict
-    image_forward: dict
-    specialties: SpecialtiesText
-    custom_personality: CustomPersonalityText
+    welcome: Welcome
+    about_bot_info: Dict[str, str]
+    account_info: Dict[str, str]
+    reset: Dict[str, str]
+    communication_start: Dict[str, str]
+    session: Session
+    error: Dict[str, str]
+    external_data: Dict[str, str]
+    documents: Documents
+    audio: Dict[str, str]
+    main_menu: MainMenu
+    settings_menu: SettingsMenu
+    specialties_menu: SpecialtiesMenu
+    feedback: Feedback
+    reactions: Reactions
+    redo: Redo
+    time_format: Dict[str, str]
+    custom_personality: CustomPersonality
+    tokens: Tokens
+    price_list: PriceList
+    image_forward: Dict[str, str]
+    confirmation: Confirmation
 
 
 class BotSettings:

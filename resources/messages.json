@@ -1,92 +1,278 @@
 {
   "welcome": {
     "with_access": {
-      "ru": "Привет! Этот бот разработан @hivaze и модерируется @Lroz3.\nВ его основе лежат несколько нейросетей, основная - ChatGPT от OpenAI.\n\nДля использования просто выбери нужный режим и можешь общаться, картинки шли не как файлы. Бот умеет понимать пересланные сообщения из чатов или каналов.\n\nВ ходе общения бот будет помнить только последние {hist_size} сообщений.\n\nЯзыковая нейросеть для тебя: {model_name}.\nВсе сообщения нигде не сохраняются, их никто не увидит!\n\nВесь код расположен тут - https://github.com/hivaze/PrivateGPTBot",
-      "en": "Hello! This bot was developed by @hivaze and moderated by @Lroz3.\nIt is based on several neural networks, with the main one being ChatGPT from OpenAI.\n\nTo use it, simply choose the desired mode and start communicating. Please note that images cannot be sent as files. The bot can understand forwarded messages from chats or channels.\n\nDuring the conversation, the bot will only remember the last {hist_size} messages.\n\nThe language model for you is: {model_name}.\nAll messages are not saved anywhere and no one will see them!\n\nThe entire code is located here - https://github.com/hivaze/PrivateGPTBot",
-      "es": "¡Hola! Este bot fue desarrollado por @hivaze y moderado por @Lroz3.\nEstá basado en varias redes neuronales, siendo la principal ChatGPT de OpenAI.\n\nPara usarlo, simplemente elige el modo deseado y comienza a comunicarte. ¡Ten en cuenta que las imágenes no se pueden enviar como archivos. El bot puede entender mensajes reenviados desde chats o canales.\n\nDurante la conversación, el bot solo recordará los últimos {hist_size} mensajes.\n\nEl modelo de lenguaje para ti es: {model_name}.\n¡Todos los mensajes no se guardan en ningún lugar y nadie los verá!\n\nTodo el código se encuentra aquí - https://github.com/hivaze/PrivateGPTBot"
+      "ru": "Привет, это твой очень умный и <b>персонализированный AI-ассистент</b>.\nВ моей основе лежат несколько нейросетей, включая ChatGPT от OpenAI.\n\nЯ не занимаюсь какой-либо рекламой, я частично <b>бесплатный</b> для всей аудитории!\n\n<b>Что я могу для всех пользователей</b>:\n- Использую GPT-3.5 для ответов\n- Умею общаться на любые темы, решать любые, хорошо сформулированные проблемы\n- Понимаю пересылаемые сообщения из каналов и чатов\n- Умею создавать кастомных персонажей для тебя\n- Умею понимать картинки (но не генерировать)\n- Умею перегенерировать сообщения\n\n<b>Что я могу для пользователей с расширенным доступом</b>:\n- Умею понимать в 4 раза больше информации\n- Умею использовать GPT-4\n- Умею работать с любым количеством документов (pdf, doc, ppt и т.д.) одновременно, могу рассказать и ответь на вопросы о содержании\n- Умею работать с многими веб-сайтами и искать информацию в интернете\n\nДля общения со мной просто выбери одного из персонажей или создай своего. Все твои сообщения не сохраняются, их никто не увидит!\n\nЧтобы стать пользователем с расширенным доступом, заполни анкету:\nhttps://docs.google.com/forms/d/1pf9DMJM0wHK-hUFxtekCtKtBiXVYCcjAZa5tJJk-HOQ",
+      "en": "Hello, this is your very smart and <b>personalized AI-assistant</b>.\nI am based on several neural networks, including ChatGPT by OpenAI.\n\nI don't do ads and I am partially <b>free</b> for everyone!\n\n<b>What can I do for all users</b>:\n- I use GPT-3.5 for answers\n- I can discuss any topic and solve any well-formulated problems\n- I understand forwarded messages from channels and chats and can summarize them\n- I can create custom characters tailored to your preferences\n- I can interpret images (though I can't generate them)\n- I can regenerate messages\n\n<b>And for users with extended access, I offer even more:</b>:\n- I can understand four times more information\n- I can utilize the advanced capabilities of GPT-4\n- I can handle any number of documents (pdf, doc, ppt, etc) simulatenously, I can summarize them and answer questions about their content\n- I can work with many websites and search for information on the Internet\n\nTo chat with me, choose a character or create your own. Your messages are not saved and remain private.\n\nWant to enjoy the benefits of extended access? Apply for an upgrade here:\nhttps://docs.google.com/forms/d/1o5msFS19oyoRF9XEXysohVtP5cG8vUeu9WZoSgahpYo"
     },
     "no_access": {
-      "ru": "К сожалению, тебе нельзя пользоваться этим ботом :(\n\nНо ты можешь поднять свой инстанс, код расположен тут - https://github.com/hivaze/PrivateGPTBot",
-      "en": "Unfortunately, you are not allowed to use this bot :(\n\nBut you can set up your own instance, the code is located here - https://github.com/hivaze/PrivateGPTBot",
-      "es": "Lamentablemente, no tienes permiso para usar este bot :(\n\nPero puedes configurar tu propia instancia, el código se encuentra aquí - https://github.com/hivaze/PrivateGPTBot"
-    },
-    "reset": {
-      "ru": "Выбирай нового персонажа, история общения со старым забыта!",
-      "en": "Choose a new character, the conversation history with the old one is forgotten!",
-      "es": "Elige un nuevo personaje, ¡se olvida la historia de conversación con el antiguo!"
+      "ru": "К сожалению, тебе нельзя пользоваться этим ботом. Сейчас ассистент закрыт для новых пользователей, но мы тебя уведомим, когда ты сможешь присоединиться. :(",
+      "en": "Unfortunately, you can't use this bot now. Access is temporarily restricted for new users, but you will be notified you once the access is opened. :("
     }
   },
-  "tokens": {
-    "notion": {
-      "ru": "Так как размер истории сообщений довольно большой, из истории сообщений было удалено {removed_tokens} токенов, но вы вероятно этого не заметите, присылайте текста короче.",
-      "en": "Since the size of the message history is quite large, {removed_tokens} tokens have been removed from the history, but you probably won't notice it, so please send shorter texts.",
-      "es": "Dado que el tamaño del historial de mensajes es bastante grande, se han eliminado {removed_tokens} tokens del historial, pero probablemente no lo notarás, así que por favor envía textos más cortos."
+  "about_bot_info": {
+    "ru": "Привет, это твой очень умный и <b>персонализированный AI-ассистент</b>.\nВ моей основе лежат несколько нейросетей, включая ChatGPT от OpenAI.\n\nЯ не занимаюсь какой-либо рекламой, я частично <b>бесплатный</b> для всей аудитории!\n\n<b>Что я могу для всех пользователей</b>:\n- Использую GPT-3.5 для ответов\n- Умею общаться на любые темы, решать любые, хорошо сформулированные проблемы\n- Понимаю пересылаемые сообщения из каналов и чатов\n- Умею создавать кастомных персонажей для тебя\n- Умею понимать картинки (но не генерировать)\n- Умею перегенерировать сообщения\n\n<b>Что я могу для пользователей с расширенным доступом</b>:\n- Умею понимать в 4 раза больше информации\n- Умею использовать GPT-4\n- Умею работать с любым количеством документов (pdf, docx, и т.д.) одновременно, могу рассказать и ответь на вопросы о содержании\n- Умею работать с многими веб-сайтами и искать информацию в интернете\n\nДля общения со мной просто выбери одного из персонажей или создай своего. Все твои сообщения не сохраняются, их никто не увидит!\n\nЧтобы стать пользователем с расширенным доступом, заполни анкету:\nhttps://docs.google.com/forms/d/1pf9DMJM0wHK-hUFxtekCtKtBiXVYCcjAZa5tJJk-HOQ\n\nУзнать статистику своего аккаунта можно используя /account",
+    "en": "Hello, this is your very smart and <b>personalized AI-assistant</b>.\nI am based on several neural networks, including ChatGPT by OpenAI.\n\nI don't do ads and I am partially <b>free</b> for everyone!\n\n<b>What can I do for all users</b>:\n- I use GPT-3.5 for answers\n- I can discuss any topic and solve any well-formulated problems\n- I understand forwarded messages from channels and chats and can summarize them\n- I can create custom characters tailored to your preferences\n- I can interpret images (though I can't generate them)\n- I can regenerate messages\n\n<b>And for users with extended access, I offer even more:</b>:\n- I can understand four times more information\n- I can utilize the advanced capabilities of GPT-4\n- I can handle any number of documents (pdf, docx, etc) simultaneously, I can summarize them and answer questions about their content\n- I can work with many websites and search for information on the Internet\n\nTo chat with me, choose a character or create your own. Your messages are not saved and remain private.\n\nWant to enjoy the benefits of extended access? Apply for an upgrade here:\nhttps://docs.google.com/forms/d/1o5msFS19oyoRF9XEXysohVtP5cG8vUeu9WZoSgahpYo\n\nFind out your account stats using /account"
+  },
+  "account_info": {
+    "ru" : "<b>Информация об аккаунте</b>:\n\nДата регистрации: <b>{registration_date}</b>\n\nОтправлено <b>{messages_count}</b> сгенерированных сообщений\nВсего использовано токенов: <b>{used_tokens}</b>\n\nВаш текущий пакет токенов: <b>{tokens_package_name}</b>\nСколько вам доступно токенов: <b>{left_tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nПакет заканчивается: <b>{expires_at}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nДокументы и интернет: <b>{functions}</b>",
+    "en": "<b>Account information</b>:\n\nRegistration date: <b>{registration_date}</b>\n\nSent <b>{messages_count}</b> messages generated\nTokens used in total: <b>{used_tokens}</b>\n\nYour current token package: <b>{tokens_package_name}</b>\nAvailable tokens: <b>{left_tokens}</b>\nThis is approximately: <b>{approx_messages}</b> messages\nThe package expires: <b>{expires_at}</b>\n\nLong context: <b>{long_context}</b>\nGPT-4 availability: <b>{superior_model}</b>\nDocuments and Internet: <b>{functions}</b>"
+  },
+  "reset": {
+    "ru": "История общения с предыдущим персонажем забыта, можешь выбирать нового",
+    "en": "The conversation history with the previous character has been cleared. Feel free to choose a new one"
+  },
+  "communication_start": {
+    "ru": "Теперь можешь просто писать, спрашивать что угодно и тд. Для перезапуска - /start или /reset. Удачи!",
+    "en": "Now, feel free to write and ask anything you want. If you need to restart at any point, just use /start or /reset. Good luck!"
+  },
+  "session": {
+    "zero_state": {
+      "ru": "Вероятно ваша сессия завершилась или бот был перезагружен. Снова выбери персонажа.",
+      "en": "It seems like your session has ended or the bot has been rebooted. Please select a character again."
     },
-    "tokens_count": {
-      "ru": "Размер вашего сообщения: {message_size}\nТокенов в истории: {tokens_usage}",
-      "en": "Size of your message: {message_size}\nTokens used in history: {tokens_usage}",
-      "es": "Tamaño de tu mensaje: {message_size}\nTokens utilizados en el historial: {tokens_usage}"
+    "end": {
+      "ru": "Ваша сессия была автоматически завершена ботом, вы сможете начать новую когда обратитесь к боту снова или используете /reset.",
+      "en": "The bot has automatically ended your session. To start a new one, just send another message to the bot or use the /reset command."
     }
-  },
-  "pers_selection": {
-    "go": {
-      "ru": "Теперь можешь просто писать, спрашивать что угодно и тд. Для перезапуска - /start или /reset. Удачи!",
-      "en": "Now you can simply write, ask anything, etc. To restart - /start or /reset. Good luck!",
-      "es": "Ahora puedes simplemente escribir, preguntar cualquier cosa, etc. Para reiniciar - /start o /reset. ¡Buena suerte!"
-    },
-    "mistake": {
-      "ru": "Ты должен выбрать персонажа для общения.\nУказанного персонажа не найдено, если считаешь это ошибкой пиши @hivaze или @Lroz3",
-      "en": "You need to choose a character to communicate with.\nThe specified character was not found. If you think this is a mistake, please contact @hivaze or @Lroz3.",
-      "es": "Debes elegir un personaje con quien comunicarte.\nNo se encontró el personaje especificado. Si crees que esto es un error, por favor contacta a @hivaze o @Lroz3."
-    },
-    "info": {
-      "ru": "Меню выбора персонажей",
-      "en": "Character selection menu",
-      "es": "Menú de selección de personajes"
-    }
-  },
-  "image_forward": {
-    "ru": "Поддержки пересланных картинок на данный момент нет, будет использоваться только текст.",
-    "en": "Image forwarding is not supported at the moment, only text will be used.",
-    "es": "No se admite el reenvío de imágenes en este momento, solo se utilizará texto."
-  },
-  "bot_reboot": {
-    "ru": "Вероятно ваша сессия завершилась или бот был перезагружен. Снова выбери персонажа.",
-    "en": "Your session has likely ended or the bot has been rebooted. Please choose a character again.",
-    "es": "Tu sesión probablemente ha finalizado o el bot se ha reiniciado. Por favor, elige un personaje nuevamente."
   },
   "error": {
-    "ru": "[ERROR] Прости, кажется что-то сломалось :(\nПопробуй уменьшить свое последнее сообщение, если не поможет используй /reset или обратись к @hivaze.",
-    "en": "[ERROR] Sorry, something went wrong :(\nTry shortening your last message, if that doesn't help, use /reset or contact @hivaze.",
-    "es": "[ERROR] Lo siento, algo salió mal :(\nIntenta acortar tu último mensaje, si eso no ayuda, usa /reset o contacta a @hivaze."
+    "ru": "[ERROR] Прости, кажется что-то сломалось :(\nПопробуй уменьшить свое последнее сообщение, если не поможет используй /reset или сообщи об ошибке с помощью кнопки 'Обратная связь'",
+    "en": "[ERROR] Sorry, it seems there was an error :(\nTry reducing the size of your last message. If that doesn't help, use /reset or report an error using the 'Feedback' button"
   },
-  "specialties": {
-    "button": {
+  "external_data": {
+    "ru": "Для ответа на это сообщение ассистент использует внешние данные...",
+    "en": "The assistant is using external data to respond to this message..."
+  },
+  "documents": {
+    "not_allowed": {
+      "ru": "Для вас недоступна функция работы с документами :(",
+      "en": "You don't have access to the document handling feature :("
+    },
+    "not_supported": {
+      "ru": "Данный тип файлов пока что не поддерживается :(",
+      "en": "This file type is not supported yet :("
+    },
+    "loading": {
+      "ru": "Ваш документ загружается, это может занять некоторое время...",
+      "en": "Your document is loading, it might take a bit of time..."
+    },
+    "loaded": {
+      "ru": "Ваш документ успешно загружен. Теперь бот сможет использовать информацию из него.",
+      "em": "Your document has been uploaded successfully. The bot will now be able to use the information from it."
+    }
+  },
+  "audio": {
+    "ru": "Бот не поддерживает работу с аудио сейчас",
+    "en": "The bot does not work with audio right now"
+  },
+  "main_menu": {
+    "info": {
+      "ru": "Это основное меню, тут ты можешь выбрать персонажа, изменить настройки или оставить фидбэк.",
+      "en": "This is the menu, here you can choose a character, change the settings or leave feedback"
+    },
+    "mistake": {
+      "ru": "Ты должен выбрать персонажа для общения или другую кнопку в меню.",
+      "en": "You have to choose a character to communicate with or a different button in the menu"
+    },
+    "about": {
+      "ru": "О боте",
+      "en": "About the bot"
+    },
+    "settings": {
+      "ru": "Настройки",
+      "en": "Settings"
+    },
+    "feedback": {
+      "ru": "Обратная связь",
+      "en": "Feedback"
+    },
+    "specialities": {
       "ru": "Другие Специальности",
-      "en": "Other Specializations",
-      "es": "Otras Especialidades"
+      "en": "Other Specializations"
+    }
+  },
+  "settings_menu": {
+    "info": {
+      "ru": "Ниже представлены настройки, нажимайте на кнопки под сообщением, чтобы их изменить",
+      "en": "Below are the settings, click on the buttons under the message to change them"
     },
-    "back_button": {
-      "ru": "Назад",
-      "en": "Back",
-      "es": "Volver"
+    "cant_use": {
+      "ru": "Вы не можете использовать эту функцию.",
+      "en": "You cannot use this function"
     },
+    "allow_global_messages": {
+      "turn_on": {
+        "ru": "Включить глобальные сообщения",
+        "en": "Turn on global messages"
+      },
+      "turn_off": {
+        "ru": "Выключить глобальные сообщения",
+        "en": "Turn off global messages"
+      }
+    },
+    "reactions": {
+      "turn_on": {
+        "ru": "Включить реакции под сообщениями",
+        "en": "Enable reactions under messages"
+      },
+      "turn_off": {
+        "ru": "Выключить реакции под сообщениями",
+        "en": "Disable reactions under messages"
+      }
+    },
+    "tokens_info": {
+      "turn_on": {
+        "ru": "Сообщать о потреблении токенов",
+        "en": "Notify about token consumption"
+      },
+      "turn_off": {
+        "ru": "Не сообщать о потреблении токенов",
+        "en": "Do not notify about token consumption"
+      }
+    },
+    "use_superior_by_default": {
+      "turn_on": {
+        "ru": "Использовать GPT-4 по умолчанию",
+        "en": "Use GPT-4 by default"
+      },
+      "turn_off": {
+        "ru": "Не использовать GPT-4 по умолчанию",
+        "en": "Do not use GPT-4 by default"
+      }
+    }
+  },
+  "specialties_menu": {
     "info": {
       "ru": "Тут другие персонажи. Ты так же можешь создать своего выбрав 'Свой персонаж'",
-      "en": "Here are other characters. You can also create your own by choosing 'Custom Personality'.",
-      "es": "Aquí están otros personajes. También puedes crear el tuyo propio seleccionando 'Personalidad Personalizada'."
+      "en": "Here are the other characters. You can also create your own by choosing 'Custom Personality'."
+    },
+    "back": {
+      "ru": "Назад",
+      "en": "Back"
     }
+  },
+  "feedback": {
+    "info": {
+      "ru": "Ты можешь связаться с создателями бота с помощью этой формы.\n\nВсе что нужно это написать свое обращение в свободной форме и нажать отправить. Мы его получим и прочитаем. Если будет нужно, свяжемся с тобой.\n\nТы можешь использовать эту форму для сообщения об ошибках, предложениях о нововведениях, рассказать про то как ты используешь бота, или просто чтобы написать свой отзыв о его работе :)",
+      "en": "You can contact the creators of the bot using this form.\n\nAll you need is to write your message in free form and press send. We will receive and read it. If necessary, we will contact you.\n\nYou can use this form to report bugs, make suggestions for improvements and new ideas, tell us about how you use this bot or just to write your feedback about its performance :)"
+    },
+    "got": {
+      "ru": "Твое сообщение было сохранено, мы обязательно с ним скоро ознакомимся",
+      "en": "Your feedback message was saved, we will read it soon."
+    },
+    "too_short": {
+      "ru": "Твое сообщение слишком короткое, используй /reset если хочешь вернуться назад в меню.",
+      "en": "Your message is too short. Use /reset if you want to go back to the menu."
+    }
+  },
+  "reactions": {
+    "good": {
+      "ru": "Хорошо",
+      "en": "Good"
+    },
+    "bad": {
+      "ru": "Плохо",
+      "en": "Bad"
+    },
+    "liked": {
+      "ru": "Вам понравилось",
+      "en": "You liked"
+    },
+    "disliked": {
+      "ru": "Вам не понравилось",
+      "en": "You disliked"
+    }
+  },
+  "redo": {
+    "default": {
+      "ru": "Переделать",
+      "en": "Redo"
+    },
+    "superior": {
+      "ru": "Переделать с GPT-4",
+      "en": "Redo with GPT-4"
+    },
+    "not_allowed": {
+      "ru": "Вам недоступна эта модель, подайте заявку на получение расширенного доступа",
+      "en": "This model is not available to you, please apply for extended access"
+    },
+    "generating": {
+      "default": {
+        "ru": "Генерируется новый вариант ответа на это сообщение...",
+        "en": "A new response to this message is being generated..."
+      },
+      "superior": {
+        "ru": "Генерируется новый вариант ответа на это сообщение c GPT-4...",
+        "en": "A new response to this message is being generated with GPT-4..."
+      }
+    },
+    "error": {
+      "ru": "Произошла ошибка при перегенерации ответа. Вероятно вы удалили свое сообщение.",
+      "en": "An error occurred while regenerating the response. Perhaps, you deleted your message."
+    }
+  },
+  "time_format": {
+    "ru": "{D} дней {H} часов {M} минут",
+    "en": "{D} days {H} hours {M} minutes"
   },
   "custom_personality": {
     "button": {
       "ru": "Свой персонаж",
-      "en": "Custom Personality",
-      "es": "Personalidad Personalizada"
+      "en": "Custom Personality"
     },
     "info": {
       "ru": "Ты должен создать своего персонажа, для этого в следующем сообщении напиши боту как он должен себя вести и что уметь. Например, можешь научить бота играть в ролевую игру\n\nВажно: Нет способа как это правильно сделать, просто поэксперементируй. Для отмены /reset",
-      "en": "You need to create your own character. In the next message, write to the bot how it should behave and what it should be able to do. For example, you can teach the bot to play a role-playing game.\n\nImportant: There is no correct way to do this, just experiment. To cancel, use /reset.",
-      "es": "Debes crear tu propio personaje. En el próximo mensaje, escribe al bot cómo debería comportarse y qué debería ser capaz de hacer. Por ejemplo, puedes enseñar al bot a jugar un juego de rol.\n\nImportante: No hay una forma correcta de hacerlo, simplemente experimenta. Para cancelar, usa /reset."
+      "en": "You need to create your own character. In the next message, write how it should behave and what it should be able to do. For example, you can teach the bot to play a role-playing game.\n\nImportant: There is no single right way to do this, you can experiment. To cancel, use /reset."
+    },
+    "too_short": {
+      "ru": "Твой промпт слишком короткий, промпт должен быть развернутой характеристикой персонажа с которым ты хочешь говорить. Напиши заново или нажми /reset для отмены",
+      "en": "Your prompt is too short. A prompt should contain detailed characteristics of the character you want to communicate with. Rewrite or press /reset to cancel"
+    }
+  },
+  "tokens": {
+    "out_of_tokens": {
+      "ru": "У вас закончился пакет токенов. Новый пакет токенов вам станет доступен через: {till_regen_delta}.\n\nЕсли ты хочешь получить пакет сообшений большего размера и больше возможностей, оставь заявку, заполнив эту анкету: https://docs.google.com/forms/d/1pf9DMJM0wHK-hUFxtekCtKtBiXVYCcjAZa5tJJk-HOQ",
+      "en": "You ran out of tokens. The new token package will be available to you in: {till_regen_delta}.\n\nIf you want to receive a larger package of messages and more features, leave a request by filling out this form: https://docs.google.com/forms/d/1o5msFS19oyoRF9XEXysohVtP5cG8vUeu9WZoSgahpYo"
+    },
+    "reset": {
+      "ru": "Ваш пакет сообщений закончился, но был обновлен на новый, уровня: {package_name}",
+      "en": "You ran out of tokens, but your package has been updated to a new one, level: {package_name}"
+    },
+    "tokens_count": {
+      "ru": "<b>Использование токенов</b>:\nИстория и твое сообщение: <b>{prompt_tokens}</b>\nГенерация: <b>{completion_tokens}</b>",
+      "en": "<b>Tokens usage</b>:\nHistory and your message: <b>{prompt_tokens}</b>\nGeneration: <b>{completion_tokens}</b>"
+    },
+    "running_out": {
+      "ru": "Ваш пакет токенов заканчивается :( У вас осталось меньше 10% токенов.",
+      "en": "You are running out of tokens :( You have less than 10% of the tokens left"
+    },
+    "granted": {
+      "ru": "<b>Ты получил новый пакет токенов: {package_name}</b>\n\nМожешь проверить его использовав /account",
+      "en": "<b>You have received a new token package: {package_name}</b>\n\nYou can check to using /account"
+    }
+  },
+  "price_list": {
+    "info": {
+      "ru": "Ниже представлено описание существующих пакетов сообщений.\n<i>Важно помнить что при генерации с использование GPT-4, тратится в 5 раз больше токенов.</i>\n\nВаш текущий пакет: <b>{package_name}</b>",
+      "en": "Ниже представлено описание существующих пакетов сообщений.\n<i>Важно помнить что при генерации с использование GPT-4, тратится в 5 раз больше токенов.</i>\n\nВаш текущий пакет: <b>{package_name}</b>"
+    },
+    "package_info": {
+      "ru": "<b>Пакет {name}</b>:\n\nЦена: <b>{price} рублей</b>\n\nКоличество токенов: <b>{tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nВыдается на: <b>{duration}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nВозможность использовать GPT-4 по умолчанию: <b>{superior_model_as_default}</b>\nДокументы и интернет: <b>{functions}</b>",
+      "en": "<b>Пакет {name}</b>:\n\nЦена: <b>{price} рублей</b>\n\nКоличество токенов: <b>{tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nВыдается на: <b>{duration}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nВозможность использовать GPT-4 по умолчанию: <b>{superior_model_as_default}</b>\nДокументы и интернет: <b>{functions}</b>"
+    }
+  },
+  "image_forward": {
+    "ru": "Поддержки пересланных картинок на данный момент нет, будет использоваться только текст.",
+    "en": "Image forwarding is not supported at the moment, only text will be used."
+  },
+  "confirmation": {
+    "yes": {
+      "ru": "Да",
+      "en": "Yes"
+    },
+    "no": {
+      "ru": "Нет",
+      "en": "No"
     }
   }
 }

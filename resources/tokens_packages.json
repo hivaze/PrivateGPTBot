@@ -1,22 +1,82 @@
 {
   "trial": {
-    "amount": 46080,
+    "level": 1,
+    "long_context": true,
+    "superior_model": true,
+    "use_functions": true,
+    "use_superior_as_default": false,
+    "tokens": 40000,
+    "price": 0,
     "duration": "3d"
   },
-  "newbie": {
-    "amount": 184320,
-    "duration": "30d"
+  "default": {
+    "level": 0,
+    "long_context": false,
+    "superior_model": false,
+    "use_functions": false,
+    "use_superior_as_default": false,
+    "tokens": 60000,
+    "price": 0,
+    "duration": "7d"
+  },
+  "start": {
+    "level": 2,
+    "long_context": true,
+    "superior_model": false,
+    "use_functions": false,
+    "use_superior_as_default": false,
+    "tokens": 400000,
+    "price": 140,
+    "duration": "60d"
+  },
+  "start+": {
+    "level": 3,
+    "long_context": true,
+    "superior_model": false,
+    "use_functions": true,
+    "use_superior_as_default": false,
+    "tokens": 600000,
+    "price": 220,
+    "duration": "60d"
   },
   "adept": {
-    "amount": 614400,
-    "duration": "30d"
+    "level": 4,
+    "long_context": true,
+    "superior_model": true,
+    "use_functions": true,
+    "use_superior_as_default": false,
+    "tokens": 1000000,
+    "price": 400,
+    "duration": "60d"
   },
-  "normal": {
-    "amount": 1351680,
-    "duration": "30d"
+  "adept+": {
+    "level": 5,
+    "long_context": true,
+    "superior_model": true,
+    "use_functions": true,
+    "use_superior_as_default": false,
+    "tokens": 1500000,
+    "price": 600,
+    "duration": "60d"
   },
   "pro": {
-    "amount": 2703360,
-    "duration": "30d"
+    "level": 6,
+    "long_context": true,
+    "superior_model": true,
+    "use_functions": true,
+    "use_superior_as_default": true,
+    "tokens": 2000000,
+    "price": 1100,
+    "duration": "60d"
+  },
+  "pro+": {
+    "level": 7,
+    "long_context": true,
+    "superior_model": true,
+    "use_functions": true,
+    "use_superior_as_default": true,
+    "tokens": 3000000,
+    "price": 1650,
+    "duration": "60d"
   }
 }

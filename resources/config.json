@@ -1,44 +1,78 @@
 {
   "OPENAI_KEY": "OPENAI_KEY",
   "TG_BOT_TOKEN": "TG_BOT_TOKEN",
+  "embeddings_model": {
+    "model_name": "text-embedding-ada-002",
+    "max_retries": 3,
+    "embedding_ctx_length": 8190
+  },
   "models": {
-    "default": {
-      "model_name": "gpt-3.5-turbo-16k",
-      "last_messages_count": 18,
-      "max_context_size": 16380
+    "small_context": {
+      "type": "open-ai",
+      "model_name": "gpt-3.5-turbo",
+      "max_context_size": 4050,
+      "tokens_scale": 1.0,
+      "generation_params": {
+        "temperature": 0.7,
+        "presence_penalty": 0.0,
+        "max_tokens": 850,
+        "n": 1,
+        "top_p": 0.9
+      }
     },
-    "privileged": {
+    "long_context": {
+      "type": "open-ai",
+      "model_name": "gpt-3.5-turbo-16k",
+      "max_context_size": 16300,
+      "tokens_scale": 1.0,
+      "generation_params": {
+        "temperature": 0.7,
+        "presence_penalty": 0.0,
+        "max_tokens": 1024,
+        "n": 1,
+        "top_p": 0.9
+      }
+    },
+    "superior": {
+      "type": "open-ai",
       "model_name": "gpt-4",
-      "last_messages_count": 14,
-      "max_context_size": 8190
+      "max_context_size": 8150,
+      "tokens_scale": 5.0,
+      "generation_params": {
+        "temperature": 0.7,
+        "presence_penalty": 0.0,
+        "max_tokens": 1024,
+        "n": 1,
+        "top_p": 0.9
+      }
     }
   },
+  "last_messages_count": 18,
   "global_mode": false,
-  "free_mode": true,
+  "free_mode": false,
+  "tokens_packages": {
+    "by_default": "default",
+    "as_first": "trial"
+  },
   "admins": [
-    "hivaze"
-  ],
-  "white_list_users": [
-    "hivaze"
+    "hivaze",
+    "Lroz3"
   ],
   "append_tokens_count": false,
   "openai_api_retries": 3,
-  "bot_max_users_memory": 50,
+  "bot_max_users_memory": 30,
   "instant_messages_waiting": 400,
+  "documents": {
+    "summary_blocks": 2,
+    "search_best_k": 8
+  },
   "blip": {
     "use_large": false,
     "device": "cpu"
   },
   "blip_gpt_prompts": {
-    "joker": "Create a meme caption using the provided image, it shows: {image_caption}. Try to be brief and postironic. Try to avoid starting with 'when you'. Use only russian language. Give only caption as an answer.",
-    "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Use only russian language.",
-    "caption_message": "{prompt} In addition to image: {message}"
-  },
-  "generation_params": {
-    "temperature": 0.7,
-    "presence_penalty": 0.0,
-    "max_tokens": 1024,
-    "n": 1,
-    "top_p": 0.9
+    "joker": "Create a meme caption using the provided image, it shows: {image_caption}. Try to be ironic and funny. Try to avoid starting with 'when you'. Use only {lang} language. Give only caption as an answer.",
+    "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Use only {lang} language. Give only caption as an answer.",
+    "caption_message": "{prompt}, In addition to image: {message}"
   }
 }
