@@ -19,8 +19,8 @@ RUN pip3 install -r requirements.txt
 
 COPY main.py main.py
 COPY start.sh start.sh
-COPY app/ app/
-COPY resources/ resources/
+#COPY app/ app/
+#COPY resources/ resources/
 
 RUN chmod +x /bot/start.sh
 

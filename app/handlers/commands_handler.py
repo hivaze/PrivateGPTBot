@@ -14,10 +14,10 @@ from app.database.entity_services.messages_service import get_all_messages, get_
     get_avg_tokens_per_message, get_avg_messages_by_user
 from app.database.entity_services.tokens_service import tokens_barrier, add_new_tokens_package, find_tokens_package
 from app.database.entity_services.users_service import access_check, check_is_admin, get_all_users, \
-    get_user_by_id, set_ban_userid
+    get_user_by_id, set_ban_userid, get_users_with_filters
 from app.handlers.exceptions_handler import zero_exception
 from app.internals.bot_logic.fsm_service import reset_user_state, UserState
-from app.utils.tg_bot_utils import build_menu_markup, format_language_code, build_buy_markup
+from app.utils.tg_bot_utils import build_menu_markup, format_language_code, build_price_markup
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +96,42 @@ async def account_status(session: Session, user: UserEntity,
     await message.answer(info_message, parse_mode='HTML')
 
 
+@dp.message_handler(commands=["price_list"], state='*')
+@zero_exception
+@with_session
+@access_check
+async def price_list(session: Session, user: UserEntity,
+                     message: types.Message, state: FSMContext,
+                     *args, **kwargs):
+
+    lc = format_language_code(user.language_code)
+    current_package = find_tokens_package(session, user.user_id)
+    avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
+
+    await message.answer(settings.messages.price_list.info[lc].format(package_name=current_package.package_name.upper()),
+                         parse_mode='HTML')
+
+    for name, package in settings.tokens_packages.items():
+        if package.level < 2:
+            continue
+
+        long_context = settings.messages.confirmation.yes[lc] if package.long_context else settings.messages.confirmation.no[lc]
+        superior_model = settings.messages.confirmation.yes[lc] if package.superior_model else settings.messages.confirmation.no[lc]
+        functions = settings.messages.confirmation.yes[lc] if package.use_functions else settings.messages.confirmation.no[lc]
+        superior_as_default = settings.messages.confirmation.yes[lc] if package.use_superior_as_default else settings.messages.confirmation.no[lc]
+
+        info = settings.messages.price_list.package_info[lc].format(name=name.upper(),
+                                                                    tokens=package.tokens,
+                                                                    approx_messages=package.tokens // avg_t_m,
+                                                                    duration=package.duration,
+                                                                    price=package.price,
+                                                                    long_context=long_context,
+                                                                    superior_model=superior_model,
+                                                                    superior_model_as_default=superior_as_default,
+                                                                    functions=functions)
+        await message.answer(info, parse_mode='HTML', reply_markup=build_price_markup(lc, name, package.price))
+
+
 @dp.message_handler(commands=["grant_package"], state='*')
 @zero_exception
 @with_session
@@ -126,14 +162,14 @@ async def send_message(session: Session,
                        message: types.Message, state: FSMContext,
                        *args, **kwargs):
     tg_user = message.from_user
-    do_markdown = message.text.split(' ').__len__() > 1
+    do_html = message.text.split(' ').__len__() > 1
 
     if check_is_admin(tg_user.username):
         await UserState.admin_message.set()
-        await state.update_data({'do_markdown': do_markdown})
+        await state.update_data({'do_html': do_html})
         reply_message = {
             'text': f'In the next message, write a message that will be sent to all known users.'
-                    f' Users count: {len(get_all_users(session))}',
+                    f' Users count: {len(get_users_with_filters(session))}',
             'reply_markup': types.ReplyKeyboardRemove()
         }
         await message.answer(**reply_message)
@@ -207,12 +243,14 @@ async def status(session: Session,
         week_messages = [m for m in all_messages if (datetime.today() - m.executed_at).days < 7]
         week_unique_users = np.unique([m.user_id for m in week_messages])
         all_users = get_all_users(session)
+        filtered_users = get_users_with_filters(session)
         today_new_users = [user for user in all_users if user.joined_at.date() == datetime.today().date()]
         week_new_users = [user for user in all_users if (datetime.today() - user.joined_at).days < 7]
         reply_message = {
             'text': f'<b>Chatbot status</b>\n\n'
                     f'<i>Users:</i>\n\n'
                     f'Total users count: {len(all_users)}\n'
+                    f'Users count with GM and no ban: {len(filtered_users)}\n'
                     f'Week new users: {len(week_new_users)}\n'
                     f'Week unique users: {len(week_unique_users)}\n'
                     f'Today new users: {len(today_new_users)}\n'

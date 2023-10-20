@@ -113,6 +113,14 @@ async def instant_messages_collector(state, message):
     return do_answer, len(instant_messages_buffer), concatenated_message, current_user_data.get("messaging_lock")
 
 
+def build_price_markup(lc: str, package_name: str, price: int):
+    buy_markup = InlineKeyboardMarkup(row_width=1)
+    buy_markup.add(InlineKeyboardButton(
+        text=f'Купить ({price} рублей)',
+        callback_data=f"buy|{package_name}"))
+    return buy_markup
+
+
 def build_settings_markup(user: UserEntity):
     lc = format_language_code(user.language_code)
     settings_menu = InlineKeyboardMarkup(row_width=1)

@@ -149,7 +149,7 @@ async def admin_message(session: Session, user: UserEntity,
     users = get_users_with_filters(session)
 
     await message.answer(f'Now your message will be sent to {len(users)} users...')
-    await global_message(session, tg_user.id, users, message.text, do_markdown=data['do_markdown'])
+    await global_message(session, tg_user.id, users, message.text, do_html=data['do_html'])
     await message.answer('Done!')
 
     await reset_user_state(session, user, state)
