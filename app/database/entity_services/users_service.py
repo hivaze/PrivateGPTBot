@@ -68,7 +68,7 @@ def get_or_create_user(session: Session, tg_user: User) -> UserEntity:
         if user.settings is None:
             user.settings = UserSettings()
         if find_tokens_package(session, tg_user.id) is None:
-            init_tokens_package(session, user, package_name=settings.config.tokens_packages.as_first)
+            init_tokens_package(session, user)
         if user.user_name != tg_user.username:
             user.user_name = tg_user.username
         if user.first_name != tg_user.first_name:
