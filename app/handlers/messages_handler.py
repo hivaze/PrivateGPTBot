@@ -17,7 +17,8 @@ from app.database.entity_services.feedback_service import save_feedback
 from app.database.entity_services.global_messages_service import global_message, get_gmua
 from app.database.entity_services.messages_service import add_message_record, get_last_message, get_message_by_tgid
 from app.database.entity_services.tokens_service import tokens_spending, find_tokens_package, tokens_barrier
-from app.database.entity_services.users_service import get_users_with_filters, access_check, get_or_create_user
+from app.database.entity_services.users_service import get_users_with_filters, access_check, get_or_create_user, \
+    get_all_users
 from app.database.sql_db_service import MessageEntity, with_session, Reaction, UserEntity
 from app.handlers.exceptions_handler import zero_exception
 from app.internals.bot_logic.fsm_service import UserState, reset_user_state, switch_to_communication_state
@@ -146,10 +147,10 @@ async def admin_message(session: Session, user: UserEntity,
     lc = format_language_code(tg_user.language_code)
 
     data = await state.get_data()
-    users = get_users_with_filters(session)
+    users = get_users_with_filters(session) if not data['for_all'] else get_all_users(session)
 
     await message.answer(f'Now your message will be sent to {len(users)} users...')
-    await global_message(session, tg_user.id, users, message.text, do_html=data['do_html'])
+    await global_message(session, tg_user.id, users, message.text, do_html=data['do_html'], for_all=data['for_all'])
     await message.answer('Done!')
 
     await reset_user_state(session, user, state)

@@ -160,8 +160,8 @@ async def grant_package(session: Session, user: UserEntity,
 @with_session
 @access_check
 async def grant_role(session: Session, user: UserEntity,
-                        message: types.Message, state: FSMContext,
-                        *args, **kwargs):
+                     message: types.Message, state: FSMContext,
+                     *args, **kwargs):
     if check_is_admin(user.user_name):
         other_id = int(message.text.split(' ')[1])
         role_name = message.text.split(' ')[2].upper()
@@ -185,17 +185,23 @@ async def send_message(session: Session,
                        message: types.Message, state: FSMContext,
                        *args, **kwargs):
     tg_user = message.from_user
-    do_html = message.text.split(' ').__len__() > 1
 
-    if check_is_admin(tg_user.username):
+    if not check_is_admin(tg_user.username):
+        return
+
+    try:
+        do_html = bool(message.text.split(' ')[1])
+        for_all = bool(message.text.split(' ')[2])
         await UserState.admin_message.set()
-        await state.update_data({'do_html': do_html})
+        await state.update_data({'do_html': do_html, 'for_all': for_all})
         reply_message = {
-            'text': f'In the next message, write a message that will be sent to all known users.'
-                    f' Users count: {len(get_users_with_filters(session))}',
+            'text': f'In the next message, write a message that will be sent to all known users.\n'
+                    f'GMs-enabled users count: {len(get_users_with_filters(session))}',
             'reply_markup': types.ReplyKeyboardRemove()
         }
         await message.answer(**reply_message)
+    except:
+        await message.answer("Format: /send_message bool(do_html) bool(for_all)")
 
 
 # @dp.message_handler(commands=["send_db"], state=UserState.menu)
