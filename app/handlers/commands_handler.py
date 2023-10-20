@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.bot import dp, tg_bot
-from app.database.sql_db_service import with_session, UserEntity
+from app.database.sql_db_service import with_session, UserEntity, Role
 from app.database.entity_services.messages_service import get_all_messages, get_avg_hist_size_by_user, \
     get_avg_tokens_by_user, \
     get_avg_tokens_per_message, get_avg_messages_by_user
@@ -151,6 +151,29 @@ async def grant_package(session: Session, user: UserEntity,
             await tg_bot.send_message(other_user.user_id,
                                       settings.messages.tokens.granted[lc].format(package_name=package_name.upper()),
                                       parse_mode='HTML')
+        else:
+            await message.answer(f'User {other_id} does not exits')
+
+
+@dp.message_handler(commands=["grant_role"], state='*')
+@zero_exception
+@with_session
+@access_check
+async def grant_role(session: Session, user: UserEntity,
+                        message: types.Message, state: FSMContext,
+                        *args, **kwargs):
+    if check_is_admin(user.user_name):
+        other_id = int(message.text.split(' ')[1])
+        role_name = message.text.split(' ')[2].upper()
+        if role_name not in ['PRIVILEGED', 'DEFAULT']:
+            await message.answer(f'Role {role_name} does not exits')
+            return
+
+        other_user = get_user_by_id(session, other_id)
+        if other_user:
+            other_user.role = Role[role_name]
+            await message.answer(
+                f"Role {role_name} granted to user '{other_user.user_id}' | '{other_user.user_name}'!")
         else:
             await message.answer(f'User {other_id} does not exits')
 
