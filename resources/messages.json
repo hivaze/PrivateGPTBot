@@ -15,7 +15,7 @@
   },
   "account_info": {
     "ru" : "<b>Информация об аккаунте</b>:\n\nДата регистрации: <b>{registration_date}</b>\n\nОтправлено <b>{messages_count}</b> сгенерированных сообщений\nВсего использовано токенов: <b>{used_tokens}</b>\n\nВаш текущий пакет токенов: <b>{tokens_package_name}</b>\nСколько вам доступно токенов: <b>{left_tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nПакет заканчивается: <b>{expires_at}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nДокументы и интернет: <b>{functions}</b>",
-    "en": "<b>Account information</b>:\n\nRegistration date: <b>{registration_date}</b>\n\nSent <b>{messages_count}</b> messages generated\nTokens used in total: <b>{used_tokens}</b>\n\nYour current token package: <b>{tokens_package_name}</b>\nAvailable tokens: <b>{left_tokens}</b>\nThis is approximately: <b>{approx_messages}</b> messages\nThe package expires: <b>{expires_at}</b>\n\nLong context: <b>{long_context}</b>\nGPT-4 availability: <b>{superior_model}</b>\nDocuments and Internet: <b>{functions}</b>"
+    "en": "<b>Account information</b>:\n\nRegistration date: <b>{registration_date}</b>\n\nSent <b>{messages_count}</b> generated messages\nTokens used in total: <b>{used_tokens}</b>\n\nYour current token package: <b>{tokens_package_name}</b>\nAvailable tokens: <b>{left_tokens}</b>\nThis is approximately: <b>{approx_messages}</b> messages\nThe package expires: <b>{expires_at}</b>\n\nLong context: <b>{long_context}</b>\nGPT-4 availability: <b>{superior_model}</b>\nDocuments and Internet: <b>{functions}</b>"
   },
   "reset": {
     "ru": "История общения с предыдущим персонажем забыта, можешь выбирать нового",

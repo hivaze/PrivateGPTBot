@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.bot import dp, tg_bot
+from app.database.entity_services.feedback_service import get_week_feedbacks
 from app.database.sql_db_service import with_session, UserEntity, Role
 from app.database.entity_services.messages_service import get_all_messages, get_avg_hist_size_by_user, \
     get_avg_tokens_by_user, \
@@ -176,6 +177,23 @@ async def grant_role(session: Session, user: UserEntity,
                 f"Role {role_name} granted to user '{other_user.user_id}' | '{other_user.user_name}'!")
         else:
             await message.answer(f'User {other_id} does not exits')
+
+
+@dp.message_handler(commands=["feedback_list"], state='*')
+@zero_exception
+@with_session
+@access_check
+async def feedback_list(session: Session, user: UserEntity,
+                        message: types.Message, state: FSMContext,
+                        *args, **kwargs):
+    if check_is_admin(user.user_name):
+        feedbacks = get_week_feedbacks(session)
+        if not feedbacks:
+            await message.answer("No feedbacks last week")
+            return
+        for feedback in feedbacks:
+            user = get_user_by_id(session, feedback.user_id)
+            await message.answer(f"Feedback from user '{user.user_id}' | '{user.user_name}' at {feedback.created_at.strftime('%Y-%m-%d %H:%M')}:\n\n{feedback.text}")
 
 
 @dp.message_handler(commands=["send_message"], state=UserState.menu)
