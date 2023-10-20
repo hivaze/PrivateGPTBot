@@ -2,7 +2,7 @@ import enum
 import inspect
 import typing
 
-from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Enum, Boolean, create_engine, Table
+from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Enum, Boolean, create_engine, Table, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
@@ -34,7 +34,7 @@ class FeedbackEntity(Base):
 
     id = Column("id", Integer, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
 
     created_at = Column(DateTime, nullable=False)
     text = Column(String(), nullable=False)
@@ -43,12 +43,12 @@ class FeedbackEntity(Base):
 class GlobalMessagesUsersAssociation(Base):
     __tablename__ = 'global_messages_users'
 
-    user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), primary_key=True)
     global_message_id = Column(Integer, ForeignKey('global_messages.id'), primary_key=True)
 
     processed_at = Column(DateTime, nullable=False)
     reaction = Column(Enum(Reaction), default=None, nullable=True)
-    tg_message_id = Column(Integer, default=None, nullable=True)
+    tg_message_id = Column(BigInteger, default=None, nullable=True)
     error_message = Column(String, default=None, nullable=True)
 
     # Relationships
@@ -78,7 +78,7 @@ class TokensPackageEntity(Base):
 
     id = Column("id", Integer, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
     # user = relationship("UserEntity", uselist=False, back_populates="tokens_package", lazy='joined')
 
     created_at = Column(DateTime, nullable=False)
@@ -93,7 +93,7 @@ class UserSettings(Base):
 
     id = Column("id", Integer, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
 
     allow_global_messages = Column(Boolean, default=True, nullable=False)
     enable_reactions = Column(Boolean, default=True, nullable=False)
@@ -105,7 +105,7 @@ class UserSettings(Base):
 class UserEntity(Base):
     __tablename__ = "users"
 
-    user_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(BigInteger, primary_key=True, index=True)
 
     user_name = Column(String(50), nullable=True)
     first_name = Column(String(50), nullable=True)
@@ -136,8 +136,8 @@ class MessageEntity(Base):
 
     id = Column("id", Integer, primary_key=True)
 
-    tg_message_id = Column(Integer, nullable=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    tg_message_id = Column(BigInteger, nullable=True, index=True)
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
 
     executed_at = Column(DateTime, nullable=False)
     time_taken = Column(Integer, default=None, nullable=True)
@@ -165,7 +165,7 @@ class FailedCommunicationEntity(Base):
 
     id = Column("id", Integer, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
     happened_at = Column(DateTime, nullable=False)
     exception_message = Column(String, nullable=False)
     traceback = Column(String, nullable=False)
