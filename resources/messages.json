@@ -58,7 +58,7 @@
     },
     "loaded": {
       "ru": "Ваш документ успешно загружен. Теперь бот сможет использовать информацию из него.",
-      "em": "Your document has been uploaded successfully. The bot will now be able to use the information from it."
+      "en": "Your document has been uploaded successfully. The bot will now be able to use the information from it."
     }
   },
   "audio": {
