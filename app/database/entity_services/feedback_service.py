@@ -18,5 +18,5 @@ def save_feedback(session: Session, user: UserEntity, text: str):
 
 def get_week_feedbacks(session: Session):
     last_week = datetime.now() - timedelta(weeks=1)
-    feedbacks = session.scalars(select(FeedbackEntity).where(FeedbackEntity.executed_at >= last_week)).all()
+    feedbacks = session.scalars(select(FeedbackEntity).where(FeedbackEntity.created_at >= last_week)).all()
     return feedbacks
