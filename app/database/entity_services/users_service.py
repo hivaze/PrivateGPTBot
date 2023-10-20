@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.database.sql_db_service import UserEntity, Role, UserSettings
-from app.database.entity_services.tokens_service import init_tokens_package
+from app.database.entity_services.tokens_service import init_tokens_package, find_tokens_package
 from app.utils.tg_bot_utils import no_access_message
 
 logger = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ def get_or_create_user(session: Session, tg_user: User) -> UserEntity:
     if user is not None:
         if user.settings is None:
             user.settings = UserSettings()
-        if user.tokens_packages is None:
+        if find_tokens_package(session, tg_user.id) is None:
             init_tokens_package(session, user, package_name=settings.config.tokens_packages.as_first)
         if user.user_name != tg_user.username:
             user.user_name = tg_user.username

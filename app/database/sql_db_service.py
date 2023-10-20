@@ -66,7 +66,7 @@ class GlobalMessageEntity(Base):
 
     created_at = Column(DateTime, nullable=False)
     text = Column(String(), nullable=False)
-    from_user = Column(Integer, nullable=False)
+    from_user = Column(BigInteger, nullable=False)
 
     user_associations = relationship("GlobalMessagesUsersAssociation",
                                      back_populates="global_message",
