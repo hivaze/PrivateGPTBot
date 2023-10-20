@@ -17,7 +17,7 @@ from app.database.entity_services.users_service import access_check, check_is_ad
     get_user_by_id, set_ban_userid
 from app.handlers.exceptions_handler import zero_exception
 from app.internals.bot_logic.fsm_service import reset_user_state, UserState
-from app.utils.tg_bot_utils import build_menu_markup, format_language_code, build_buy_markup
+from app.utils.tg_bot_utils import build_menu_markup, format_language_code
 
 logger = logging.getLogger(__name__)
 
