@@ -150,7 +150,7 @@ async def admin_message(session: Session, user: UserEntity,
     users = get_users_with_filters(session) if not data['for_all'] else get_all_users(session)
 
     await message.answer(f'Now your message will be sent to {len(users)} users...')
-    await global_message(session, tg_user.id, users, message.text, do_html=data['do_html'], for_all=data['for_all'])
+    await global_message(session, tg_user.id, users, message.text, do_html=data['do_html'])
     await message.answer('Done!')
 
     await reset_user_state(session, user, state)
