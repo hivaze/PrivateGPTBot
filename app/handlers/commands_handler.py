@@ -77,8 +77,8 @@ async def account_status(session: Session, user: UserEntity,
 
     messages = user.messages
     models_counter = Counter([m.model for m in messages])
-    superior_part = round(models_counter[settings.config.models.superior.model_name] / len(messages), 2)
-    regenerated_part = round(sum([m.regenerated for m in messages if m.regenerated is not None]) / len(messages), 2)
+    superior_part = round(models_counter[settings.config.models.superior.model_name] / len(messages), 4) * 100
+    regenerated_part = round(sum([m.regenerated for m in messages if m.regenerated is not None]) / len(messages), 4) * 100
     avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
 
     long_context = settings.messages.confirmation.yes[lc] if tokens_package_config.long_context else settings.messages.confirmation.no[lc]
@@ -292,7 +292,7 @@ async def status(session: Session,
         today_unique_users = np.unique([m.user_id for m in today_messages])
         week_messages = [m for m in all_messages if (datetime.today() - m.executed_at).days < 7]
         week_regenerated_part = round(
-            sum([m.regenerated for m in week_messages if m.regenerated is not None]) / len(week_messages), 2)
+            sum([m.regenerated for m in week_messages if m.regenerated is not None]) / len(week_messages), 4) * 100
         week_unique_users = np.unique([m.user_id for m in week_messages])
         all_users = get_all_users(session)
         filtered_users = get_users_with_filters(session)
