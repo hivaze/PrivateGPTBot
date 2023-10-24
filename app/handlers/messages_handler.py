@@ -168,8 +168,10 @@ async def admin_message(session: Session, user: UserEntity,
 @access_check
 async def communication_answer(session: Session, user: UserEntity,
                                message: types.Message, state: FSMContext,
-                               add_user_message_to_hist=True, do_superior=False, is_image=False, has_document=False,
-                               function_call="auto", *args, **kwargs):
+                               add_user_message_to_hist=True, do_superior=False,
+                               is_image=False, has_document=False,
+                               function_call="auto", ignore_lock=False,
+                               *args, **kwargs):
     tg_user = message.from_user
     sent_message = None
     lc = format_language_code(tg_user.language_code)
@@ -179,7 +181,8 @@ async def communication_answer(session: Session, user: UserEntity,
     if not do_answer:
         return
 
-    await messages_lock.acquire()
+    if not ignore_lock:
+        await messages_lock.acquire()
 
     try:  # try-finally block for precise lock release
 
@@ -303,8 +306,6 @@ async def communication_answer(session: Session, user: UserEntity,
             # Update chat history and release the lock
             history.add_message(function_response)
             await state.update_data({"history": history})
-            if messages_lock.locked():
-                messages_lock.release()
 
             # Call to get the final response
             await asyncio.get_event_loop().create_task(communication_answer(message,
@@ -313,7 +314,8 @@ async def communication_answer(session: Session, user: UserEntity,
                                                                             do_superior=do_superior,
                                                                             function_call="none",
                                                                             has_document=has_document,
-                                                                            is_image=is_image))
+                                                                            is_image=is_image,
+                                                                            ignore_lock=True))
             return
 
         # Check tokens in the end and reset the state to menu
@@ -332,7 +334,7 @@ async def communication_answer(session: Session, user: UserEntity,
         await state.update_data({"history": history})
 
     finally:
-        if messages_lock.locked():
+        if not ignore_lock and messages_lock.locked():
             messages_lock.release()
 
 
@@ -432,11 +434,11 @@ async def document_answer(session: Session,
         await message.answer(settings.messages.documents.loaded[lc])
 
 
-@dp.message_handler(state=UserState.communication, content_types=ContentType.AUDIO)
+@dp.message_handler(state=UserState.communication, content_types=ContentType.VOICE)
 @zero_exception
 @with_session
 @access_check
-async def audio_answer(session: Session,
+async def voice_answer(session: Session,
                        message: types.Message, state: FSMContext,
                        *args, **kwargs):
     tg_user = message.from_user
@@ -554,9 +556,9 @@ async def callback_query(session: Session, user: UserEntity,
                 related_to.regenerated = True
                 history.drop_last_arc()
                 await state.update_data({"history": history})
-                messages_lock.release()
                 await asyncio.get_event_loop().create_task(communication_answer(target_message,
                                                                                 do_superior=use_superior,
+                                                                                ignore_lock=True,
                                                                                 state=state))
             except:
                 await message.answer(settings.messages.redo.error[lc])
