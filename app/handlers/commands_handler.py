@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 from datetime import datetime
 
 import numpy as np
@@ -75,7 +76,9 @@ async def account_status(session: Session, user: UserEntity,
     tokens_package_config = settings.tokens_packages.get(tokens_package.package_name, 'default')
 
     messages = user.messages
-    used_tokens = sum([m.total_tokens for m in messages])
+    models_counter = Counter([m.model for m in messages])
+    superior_part = round(models_counter[settings.config.models.superior.model_name] / len(messages), 2)
+    regenerated_part = round(sum([m.regenerated for m in messages if m.regenerated is not None]) / len(messages), 2)
     avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
 
     long_context = settings.messages.confirmation.yes[lc] if tokens_package_config.long_context else settings.messages.confirmation.no[lc]
@@ -85,7 +88,8 @@ async def account_status(session: Session, user: UserEntity,
     info_message = settings.messages.account_info[lc]
     info_message = info_message.format(registration_date=user.joined_at.strftime("%Y-%m-%d %H:%M"),
                                        messages_count=len(messages),
-                                       used_tokens=used_tokens,
+                                       superior_part=superior_part,
+                                       regenerated_part=regenerated_part,
                                        left_tokens=tokens_package.left_tokens,
                                        approx_messages=tokens_package.left_tokens // avg_t_m,
                                        tokens_package_name=tokens_package.package_name.upper(),
@@ -93,7 +97,6 @@ async def account_status(session: Session, user: UserEntity,
                                        functions=functions,
                                        long_context=long_context,
                                        superior_model=superior_model)
-
     await message.answer(info_message, parse_mode='HTML')
 
 
@@ -288,6 +291,8 @@ async def status(session: Session,
         today_messages = [m for m in all_messages if m.executed_at.date() == datetime.today().date()]
         today_unique_users = np.unique([m.user_id for m in today_messages])
         week_messages = [m for m in all_messages if (datetime.today() - m.executed_at).days < 7]
+        week_regenerated_part = round(
+            sum([m.regenerated for m in week_messages if m.regenerated is not None]) / len(week_messages), 2)
         week_unique_users = np.unique([m.user_id for m in week_messages])
         all_users = get_all_users(session)
         filtered_users = get_users_with_filters(session)
@@ -305,6 +310,7 @@ async def status(session: Session,
                     f'<i>Messages:</i>\n\n'
                     f'Total messages count: {len(all_messages)}\n'
                     f'Week messages count: {len(week_messages)}\n'
+                    f'Week perc. of regenerated: {week_regenerated_part}%\n'
                     f'Week avg. user messages count: {round(get_avg_messages_by_user(session), 2)}\n'
                     f'Today messages count: {len(today_messages)}\n'
                     f'Week avg. user history size: {round(get_avg_hist_size_by_user(session), 2)}\n\n'

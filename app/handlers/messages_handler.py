@@ -168,7 +168,7 @@ async def admin_message(session: Session, user: UserEntity,
 @access_check
 async def communication_answer(session: Session, user: UserEntity,
                                message: types.Message, state: FSMContext,
-                               add_user_message_to_hist=True, do_superior=False,  is_image=False, has_document=False,
+                               add_user_message_to_hist=True, do_superior=False, is_image=False, has_document=False,
                                function_call="auto", *args, **kwargs):
     tg_user = message.from_user
     sent_message = None
@@ -289,8 +289,9 @@ async def communication_answer(session: Session, user: UserEntity,
 
         if user.settings.enable_tokens_info:
             await message.reply(settings.messages.tokens.tokens_count[lc].format(
-                prompt_tokens=generation_result.prompt_tokens_usage * generation_result.model_config.tokens_scale,
-                completion_tokens=generation_result.completion_tokens_usage * generation_result.model_config.tokens_scale,
+                prompt_tokens=int(generation_result.prompt_tokens_usage * generation_result.model_config.tokens_scale),
+                completion_tokens=int(generation_result.completion_tokens_usage * generation_result.model_config.tokens_scale),
+                left_tokens=left_tokens,
             ), parse_mode='HTML')
 
         # Make function call
