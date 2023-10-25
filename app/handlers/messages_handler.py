@@ -264,7 +264,7 @@ async def communication_answer(session: Session, user: UserEntity,
                                                        user_message=message,
                                                        bot_message=generation_result.message.text,
                                                        do_reply=instant_messages_buffer_size == 1,
-                                                       add_redo=instant_messages_buffer_size == 1)
+                                                       add_redo=instant_messages_buffer_size == 1 and not is_image)
             logger.info(f'AI answer sent to "{tg_user.username}" | "{tg_user.id}",'
                         f' personality: "{personality}",'
                         f' model: "{generation_result.model_config.model_name}",'
