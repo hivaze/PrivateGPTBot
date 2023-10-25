@@ -54,6 +54,26 @@ async def welcome_user(session: Session, user: UserEntity,
     await message.answer(**reply_message)
 
 
+# @dp.message_handler(commands=["stop"], state='*')
+# @zero_exception
+# @with_session
+# @access_check
+# async def stop_generation(session: Session, user: UserEntity,
+#                        message: types.Message, state: FSMContext,
+#                        *args, **kwargs):
+#     tg_user = message.from_user
+#     lc = format_language_code(tg_user.language_code)
+#
+#     await reset_user_state(session, user, state)
+#
+#     reply_message = {
+#         'text': text,
+#         'reply_markup': build_menu_markup(lc),
+#         'parse_mode': 'HTML'
+#     }
+#     await message.answer(**reply_message)
+
+
 @dp.message_handler(commands=["account"], state='*')
 @zero_exception
 @with_session
@@ -77,8 +97,8 @@ async def account_status(session: Session, user: UserEntity,
 
     messages = user.messages
     models_counter = Counter([m.model for m in messages])
-    superior_part = round(models_counter[settings.config.models.superior.model_name] * 100 / len(messages), 3)
-    regenerated_part = round(sum([m.regenerated for m in messages if m.regenerated is not None]) * 100 / len(messages), 3)
+    superior_part = round(models_counter[settings.config.models.superior.model_name] * 100 / (len(messages) or 1), 3)
+    regenerated_part = round(sum([m.regenerated for m in messages if m.regenerated is not None]) * 100 / (len(messages) or 1), 3)
     avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
 
     long_context = settings.messages.confirmation.yes[lc] if tokens_package_config.long_context else settings.messages.confirmation.no[lc]
