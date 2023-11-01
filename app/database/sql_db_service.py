@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker
 
 engine = create_engine(f'postgresql+psycopg2://test_user:testPassword123@postgres:5432/app_db',
                        pool_size=20,
-                       max_overflow=0)
+                       max_overflow=200)
 
 session_factory = sessionmaker(engine, expire_on_commit=False, autoflush=False)  # Autoflush must be disabled
 Base = declarative_base()
