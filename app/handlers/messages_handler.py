@@ -301,7 +301,11 @@ async def communication_answer(session: Session, user: UserEntity,
         if generation_result.is_function_call:
             async with TypingBlock(message.chat):
                 await message.reply(settings.messages.external_data[lc])
-                function_response = await execute_function_call(user, current_user_data, generation_result.message)
+                function_response = await asyncio.get_event_loop().run_in_executor(thread_pool,
+                                                                                   execute_function_call,
+                                                                                   user,
+                                                                                   current_user_data,
+                                                                                   generation_result.message)
 
             # Update chat history and release the lock
             history.add_message(function_response)
