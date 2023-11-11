@@ -14,14 +14,12 @@ from app.database.sql_db_service import with_session, UserEntity, Role
 from app.database.entity_services.messages_service import get_all_messages, get_avg_hist_size_by_user, \
     get_avg_tokens_by_user, \
     get_avg_tokens_per_message, get_avg_messages_by_user
-from app.database.entity_services.tokens_service import tokens_barrier, add_new_tokens_package, find_tokens_package
+from app.database.entity_services.tokens_packages_service import tokens_barrier, add_new_tokens_package, find_tokens_package
 from app.database.entity_services.users_service import access_check, check_is_admin, get_all_users, \
     get_user_by_id, set_ban_userid, get_users_with_filters
 from app.handlers.exceptions_handler import zero_exception
 from app.internals.bot_logic.fsm_service import reset_user_state, UserState
-
 from app.utils.tg_bot_utils import build_menu_markup, format_language_code, build_price_markup
-
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +62,7 @@ async def welcome_user(session: Session, user: UserEntity,
 #                        message: types.Message, state: FSMContext,
 #                        *args, **kwargs):
 #     tg_user = message.from_user
-#     lc = format_language_code(tg_user.language_code)
+#     lc = format_l anguage_code(tg_user.language_code)
 #
 #     await reset_user_state(session, user, state)
 #
@@ -100,12 +98,16 @@ async def account_status(session: Session, user: UserEntity,
     messages = user.messages
     models_counter = Counter([m.model for m in messages])
     superior_part = round(models_counter[settings.config.models.superior.model_name] * 100 / (len(messages) or 1), 3)
-    regenerated_part = round(sum([m.regenerated for m in messages if m.regenerated is not None]) * 100 / (len(messages) or 1), 3)
+    regenerated_part = round(
+        sum([m.regenerated for m in messages if m.regenerated is not None]) * 100 / (len(messages) or 1), 3)
     avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
 
-    long_context = settings.messages.confirmation.yes[lc] if tokens_package_config.long_context else settings.messages.confirmation.no[lc]
-    superior_model = settings.messages.confirmation.yes[lc] if tokens_package_config.superior_model else settings.messages.confirmation.no[lc]
-    functions = settings.messages.confirmation.yes[lc] if tokens_package_config.use_functions else settings.messages.confirmation.no[lc]
+    long_context = settings.messages.confirmation.yes[lc] if tokens_package_config.long_context else \
+        settings.messages.confirmation.no[lc]
+    superior_model = settings.messages.confirmation.yes[lc] if tokens_package_config.superior_model else \
+        settings.messages.confirmation.no[lc]
+    functions = settings.messages.confirmation.yes[lc] if tokens_package_config.use_functions else \
+        settings.messages.confirmation.no[lc]
 
     info_message = settings.messages.account_info[lc]
     info_message = info_message.format(registration_date=user.joined_at.strftime("%Y-%m-%d %H:%M"),
@@ -129,22 +131,26 @@ async def account_status(session: Session, user: UserEntity,
 async def price_list(session: Session, user: UserEntity,
                      message: types.Message, state: FSMContext,
                      *args, **kwargs):
-
     lc = format_language_code(user.language_code)
     current_package = find_tokens_package(session, user.user_id)
     avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
 
-    await message.answer(settings.messages.price_list.info[lc].format(package_name=current_package.package_name.upper()),
-                         parse_mode='HTML')
+    await message.answer(
+        settings.messages.price_list.info[lc].format(package_name=current_package.package_name.upper()),
+        parse_mode='HTML')
 
     for name, package in settings.tokens_packages.items():
         if package.level < 2:
             continue
 
-        long_context = settings.messages.confirmation.yes[lc] if package.long_context else settings.messages.confirmation.no[lc]
-        superior_model = settings.messages.confirmation.yes[lc] if package.superior_model else settings.messages.confirmation.no[lc]
-        functions = settings.messages.confirmation.yes[lc] if package.use_functions else settings.messages.confirmation.no[lc]
-        superior_as_default = settings.messages.confirmation.yes[lc] if package.use_superior_as_default else settings.messages.confirmation.no[lc]
+        long_context = settings.messages.confirmation.yes[lc] if package.long_context else \
+            settings.messages.confirmation.no[lc]
+        superior_model = settings.messages.confirmation.yes[lc] if package.superior_model else \
+            settings.messages.confirmation.no[lc]
+        functions = settings.messages.confirmation.yes[lc] if package.use_functions else \
+            settings.messages.confirmation.no[lc]
+        superior_as_default = settings.messages.confirmation.yes[lc] if package.use_superior_as_default else \
+            settings.messages.confirmation.no[lc]
 
         info = settings.messages.price_list.package_info[lc].format(name=name.upper(),
                                                                     tokens=package.tokens,
@@ -158,7 +164,7 @@ async def price_list(session: Session, user: UserEntity,
         await message.answer(info, parse_mode='HTML', reply_markup=build_price_markup(lc, name, package.price))
 
 
-@dp.message_handler(commands=["grant_package"], state='*')
+@dp.message_handler(commands=["grant_package", "gp"], state='*')
 @zero_exception
 @with_session
 @access_check
@@ -181,7 +187,7 @@ async def grant_package(session: Session, user: UserEntity,
             await message.answer(f'User {other_id} does not exits')
 
 
-@dp.message_handler(commands=["grant_role"], state='*')
+@dp.message_handler(commands=["grant_role", "gr"], state='*')
 @zero_exception
 @with_session
 @access_check
@@ -204,24 +210,44 @@ async def grant_role(session: Session, user: UserEntity,
             await message.answer(f'User {other_id} does not exits')
 
 
-@dp.message_handler(commands=["feedback_list"], state='*')
+@dp.message_handler(commands=["feedback_list", "fbl"], state='*')
 @zero_exception
 @with_session
 @access_check
 async def feedback_list(session: Session, user: UserEntity,
                         message: types.Message, state: FSMContext,
                         *args, **kwargs):
-    if check_is_admin(user.user_name):
-        feedbacks = get_week_feedbacks(session)
-        if not feedbacks:
-            await message.answer("No feedbacks last week")
-            return
-        for feedback in feedbacks:
-            user = get_user_by_id(session, feedback.user_id)
-            await message.answer(f"Feedback from user '{user.user_id}' | '{user.user_name}' at {feedback.created_at.strftime('%Y-%m-%d %H:%M')}:\n\n{feedback.text}")
+    if not check_is_admin(user.user_name):
+        return
+
+    feedbacks = get_week_feedbacks(session)
+    if not feedbacks:
+        await message.answer("No feedbacks last week")
+        return
+    for feedback in feedbacks:
+        user = get_user_by_id(session, feedback.user_id)
+        await message.answer(
+            f"Feedback from user '{user.user_id}' | '{user.user_name}' at {feedback.created_at.strftime('%Y-%m-%d %H:%M')}:\n\n{feedback.text}")
 
 
-@dp.message_handler(commands=["send_message"], state=UserState.menu)
+@dp.message_handler(commands=["feedback_answer", "fba"], state='*')
+@zero_exception
+@with_session
+@access_check
+async def feedback_answer(session: Session, user: UserEntity,
+                          message: types.Message, state: FSMContext,
+                          *args, **kwargs):
+    if not check_is_admin(user.user_name):
+        return
+
+    arguments = message.text.split(' ')
+    if len(arguments) == 0:
+        await message.answer("Usage: /feedback_answer {feedback_id} {text}")
+
+    # TODO
+
+
+@dp.message_handler(commands=["send_message", "sm"], state=UserState.menu)
 @zero_exception
 @with_session
 async def send_message(session: Session,
@@ -245,17 +271,6 @@ async def send_message(session: Session,
         await message.answer(**reply_message)
     except:
         await message.answer("Format: /send_message bool(do_html) bool(for_all)")
-
-
-# @dp.message_handler(commands=["send_db"], state=UserState.menu)
-# @zero_exception
-# async def send_db_file(message: types.Message, state: FSMContext,
-#                        *args, **kwargs):
-#     tg_user = message.from_user
-#
-#     if check_is_admin(tg_user.username):
-#         await message.answer(text="DB file preparing...")
-#         await send_db(tg_user)
 
 
 @dp.message_handler(commands=["ban"], state=UserState.menu)

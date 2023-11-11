@@ -1,7 +1,9 @@
 import asyncio
 import datetime
 import logging
+import tempfile
 
+from PIL import Image
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -62,12 +64,6 @@ async def no_access_message(tg_user: User, message):
     await message.answer(text=settings.messages.welcome.no_access[lc])
 
 
-# async def send_db(tg_user: User):
-#     from app.bot import tg_bot
-#     file = InputFile(DB_PATH, filename=f"users-{datetime.datetime.now()}.db")
-#     await tg_bot.send_document(tg_user.id, file)
-
-
 def session_auto_ended(tg_chat_id: int):
     from app.bot import tg_bot
     from app.database.entity_services import users_service
@@ -119,6 +115,16 @@ def build_price_markup(lc: str, package_name: str, price: int):
         text=f'Купить ({price} рублей)',
         callback_data=f"buy|{package_name}"))
     return buy_markup
+
+
+async def handle_image_upload(file_info):
+    from app.bot import tg_bot
+    with tempfile.TemporaryDirectory() as tmp_dir:  # temp dir for future support of many photos
+        result = await tg_bot.download_file(file_path=file_info.file_path,
+                                            destination_dir=tmp_dir)
+        result.close()
+        image = Image.open(result.name).convert('RGB')
+    return image
 
 
 def build_settings_markup(user: UserEntity):

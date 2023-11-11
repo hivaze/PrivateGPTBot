@@ -37,6 +37,7 @@ class FeedbackEntity(Base):
     id = Column("id", Integer, primary_key=True)
 
     user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
+    tg_message_id = Column(Integer, nullable=True)
 
     created_at = Column(DateTime, nullable=False)
     text = Column(String(), nullable=False)
@@ -88,6 +89,8 @@ class TokensPackageEntity(Base):
     package_name = Column(String(20), nullable=False)
     level = Column(Integer, nullable=False)
     left_tokens = Column(Integer, default=0, nullable=False)
+    left_images = Column(Integer, default=0, nullable=False)
+    left_stt_minutes = Column(Integer, default=0, nullable=False)
 
 
 class UserSettings(Base):
@@ -133,6 +136,15 @@ class UserEntity(Base):
                                                cascade="all, delete-orphan")
 
 
+class ImageGenerationEntity(Base):
+    __tablename__ = "image_generations"
+
+    id = Column("id", Integer, primary_key=True)
+
+    tg_message_id = Column(BigInteger, nullable=True, index=True)
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
+
+
 class MessageEntity(Base):
     __tablename__ = "messages"
 
@@ -154,6 +166,7 @@ class MessageEntity(Base):
 
     instant_buffer = Column(Integer, default=1, nullable=False)
     has_image = Column(Boolean, default=False, nullable=False)
+    has_audio = Column(Boolean, default=False, nullable=False)
     has_document = Column(Boolean, default=False, nullable=False)
     function_call = Column(String(50), nullable=True)
 

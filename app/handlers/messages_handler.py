@@ -1,10 +1,8 @@
 import asyncio
 import datetime
 import logging
-import tempfile
 from asyncio import CancelledError
 
-from PIL import Image
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentType
@@ -12,27 +10,25 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.bot import dp, small_context_model, long_context_model, superior_model, thread_pool
-from app.database.chroma_db_service import add_documents
 from app.database.entity_services.feedback_service import save_feedback
 from app.database.entity_services.global_messages_service import global_message, get_gmua
 from app.database.entity_services.messages_service import add_message_record, get_last_message, get_message_by_tgid
-from app.database.entity_services.tokens_service import tokens_spending, find_tokens_package, tokens_barrier
-from app.database.entity_services.users_service import get_users_with_filters, access_check, get_or_create_user, \
-    get_all_users
+from app.database.entity_services.tokens_packages_service import tokens_spending, find_tokens_package, tokens_barrier
+from app.database.entity_services.users_service import get_users_with_filters, access_check, get_all_users
 from app.database.sql_db_service import MessageEntity, with_session, Reaction, UserEntity
 from app.handlers.exceptions_handler import zero_exception
 from app.internals.bot_logic.fsm_service import UserState, reset_user_state, switch_to_communication_state
 from app.internals.chat.chat_history import ChatHistory, ChatRole, ChatMessage
-from app.internals.chat.chat_models import TextGenerationResult
-from app.internals.custom_models.blip_captions_model import get_images_captions
+from app.internals.ai.chat_models import TextGenerationResult
+from app.internals.ai.blip_captions_model import get_images_captions
 from app.internals.function_calling.definitions import build_openai_functions
 from app.internals.function_calling.executors import execute_function_call
-from app.internals.function_calling.files_processor import load_single_document, check_if_extension_supported, \
-    build_document_info, make_summary
+from app.internals.function_calling.utils.document_processor import check_if_extension_supported, \
+    handle_document_upload
 from app.utils.tg_bot_utils import build_menu_markup, build_specials_markup, format_language_code, \
     send_response_message, \
     format_system_prompt, instant_messages_collector, clean_last_message_markup, update_messages_reaction_markup, \
-    send_settings_menu, update_settings_markup, TypingBlock, update_gmua_reaction_markup
+    send_settings_menu, update_settings_markup, TypingBlock, update_gmua_reaction_markup, handle_image_upload
 
 logger = logging.getLogger(__name__)
 
@@ -293,7 +289,8 @@ async def communication_answer(session: Session, user: UserEntity,
         if user.settings.enable_tokens_info:
             await message.reply(settings.messages.tokens.tokens_count[lc].format(
                 prompt_tokens=int(generation_result.prompt_tokens_usage * generation_result.model_config.tokens_scale),
-                completion_tokens=int(generation_result.completion_tokens_usage * generation_result.model_config.tokens_scale),
+                completion_tokens=int(
+                    generation_result.completion_tokens_usage * generation_result.model_config.tokens_scale),
                 left_tokens=left_tokens,
             ), parse_mode='HTML')
 
@@ -312,14 +309,14 @@ async def communication_answer(session: Session, user: UserEntity,
             await state.update_data({"history": history})
 
             # Call to get the final response
-            await asyncio.get_event_loop().create_task(communication_answer(message,
-                                                                            state=state,
-                                                                            add_user_message_to_hist=False,
-                                                                            do_superior=do_superior,
-                                                                            function_call="none",
-                                                                            has_document=has_document,
-                                                                            is_image=is_image,
-                                                                            ignore_lock=True))
+            asyncio.get_event_loop().create_task(communication_answer(message,
+                                                                      state=state,
+                                                                      add_user_message_to_hist=False,
+                                                                      do_superior=do_superior,
+                                                                      function_call="none",
+                                                                      has_document=has_document,
+                                                                      is_image=is_image,
+                                                                      ignore_lock=True))
             return
 
         # Check tokens in the end and reset the state to menu
@@ -350,37 +347,32 @@ async def photo_answer(message: types.Message, state: FSMContext, *args, **kwarg
     tg_user = message.from_user
     lc = format_language_code(tg_user.language_code)
 
-    current_user_data = await state.get_data()
+    # current_user_data = await state.get_data()
 
-    if message.is_forward():
-        await message.reply(settings.messages.image_forward[lc])
-        message.text = message.caption
-        await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=False))
-        return
+    await message.reply(settings.messages.image_forward[lc])
+    message.text = message.caption
+    asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=False))
 
-    file_info = await message.bot.get_file(message.photo[-1].file_id)
-
-    with tempfile.TemporaryDirectory() as tmp_dir:  # temp dir for future support of many photos
-        result = await message.bot.download_file(file_path=file_info.file_path,
-                                                 destination_dir=tmp_dir)
-        result.close()
-        image = Image.open(result.name).convert('RGB')
-
-    image_caption = get_images_captions(image)[0]
-    pers = current_user_data.get('personality')
-
-    if pers == 'joker':
-        chat_gpt_prompt = settings.config.blip_gpt_prompts.joker.format(image_caption=image_caption, lang=lc)
-    else:
-        chat_gpt_prompt = settings.config.blip_gpt_prompts.basic.format(image_caption=image_caption, lang=lc)
-    if message.caption != '' and message.caption is not None:
-        chat_gpt_prompt = settings.config.blip_gpt_prompts.caption_message.format(prompt=chat_gpt_prompt,
-                                                                                  message=message.caption)
-    message.text = chat_gpt_prompt
-
-    logger.info(f"User '{tg_user.username}' sends a picture with size ({image.width}, {image.height})")
-
-    await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=True))
+    # file_info = await message.bot.get_file(message.photo[-1].file_id)
+    #
+    # async with TypingBlock(message.chat):
+    #     image = await handle_image_upload(file_info)
+    #     image_caption = get_images_captions(image)[0]
+    #
+    # pers = current_user_data.get('personality')
+    #
+    # if pers == 'joker':
+    #     chat_gpt_prompt = settings.config.blip_gpt_prompts.joker.format(image_caption=image_caption, lang=lc)
+    # else:
+    #     chat_gpt_prompt = settings.config.blip_gpt_prompts.basic.format(image_caption=image_caption, lang=lc)
+    # if message.caption != '' and message.caption is not None:
+    #     chat_gpt_prompt = settings.config.blip_gpt_prompts.caption_message.format(prompt=chat_gpt_prompt,
+    #                                                                               message=message.caption)
+    # message.text = chat_gpt_prompt
+    #
+    # logger.info(f"User '{tg_user.username}' sends a picture with size ({image.width}, {image.height})")
+    #
+    # asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=True))
 
 
 @dp.message_handler(state=UserState.communication, content_types=ContentType.DOCUMENT)
@@ -402,38 +394,18 @@ async def document_answer(session: Session,
 
     file_info = await message.bot.get_file(message.document.file_id)
     caption = message.caption
-    current_user_data = await state.get_data()
-    current_documents = current_user_data.get('documents') or []
 
     if not check_if_extension_supported(file_info.file_path):
         await message.reply(settings.messages.documents.not_supported[lc])
         return
 
-    await message.reply(settings.messages.documents.loading[lc])
-
     async with TypingBlock(message.chat):
-
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            result = await message.bot.download_file(file_path=file_info.file_path, destination_dir=tmp_dir)
-            result.close()
-
-            vectorstore = current_user_data.get('vectorstore')
-            splits = load_single_document(file_path=result.name,
-                                          file_name=message.document.file_name,
-                                          file_id=file_info.file_unique_id)
-            add_documents(vectorstore, documents=splits)
-
-            summary = await asyncio.get_event_loop().run_in_executor(thread_pool, make_summary, splits, tg_user)
-            document_info = build_document_info(file_info.file_unique_id, message.document.file_name, summary)
-            current_documents.append(document_info)
-
-            logger.info(f"File uploaded by '{tg_user.username}' | '{tg_user.id}' {document_info}")
-
-        await state.update_data({'documents': current_documents})
+        await message.reply(settings.messages.documents.loading[lc])
+        await handle_document_upload(tg_user, message.document.file_name, file_info, state)
 
     if message.caption != '' and message.caption is not None:
         message.text = caption
-        await asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_document=True))
+        asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_document=True))
     else:
         await message.answer(settings.messages.documents.loaded[lc])
 
@@ -560,10 +532,10 @@ async def callback_query(session: Session, user: UserEntity,
                 related_to.regenerated = True
                 history.drop_last_arc()
                 await state.update_data({"history": history})
-                await asyncio.get_event_loop().create_task(communication_answer(target_message,
-                                                                                do_superior=use_superior,
-                                                                                ignore_lock=True,
-                                                                                state=state))
+                asyncio.get_event_loop().create_task(communication_answer(target_message,
+                                                                          do_superior=use_superior,
+                                                                          ignore_lock=True,
+                                                                          state=state))
             except:
                 await message.answer(settings.messages.redo.error[lc])
             finally:

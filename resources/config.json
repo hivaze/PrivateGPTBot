@@ -6,23 +6,33 @@
     "max_retries": 3,
     "embedding_ctx_length": 8190
   },
-  "models": {
+  "audio_transcript_model": {
+    "type": "open-ai",
+    "model_name": "whisper-1"
+  },
+  "image_gen_model": {
+    "type": "open-ai",
+    "model_name": "dall-e-3",
+    "size": "1024x1024",
+    "quality": "standard"
+  },
+  "chat_models": {
     "small_context": {
       "type": "open-ai",
-      "model_name": "gpt-3.5-turbo",
-      "max_context_size": 4050,
+      "model_name": "gpt-3.5-turbo-1106",
+      "max_context_size": 8100,
       "tokens_scale": 1.0,
       "generation_params": {
         "temperature": 0.7,
         "presence_penalty": 0.0,
-        "max_tokens": 850,
+        "max_tokens": 1024,
         "n": 1,
         "top_p": 0.9
       }
     },
     "long_context": {
       "type": "open-ai",
-      "model_name": "gpt-3.5-turbo-16k",
+      "model_name": "gpt-3.5-turbo-1106",
       "max_context_size": 16300,
       "tokens_scale": 1.0,
       "generation_params": {
@@ -35,9 +45,9 @@
     },
     "superior": {
       "type": "open-ai",
-      "model_name": "gpt-4",
-      "max_context_size": 8150,
-      "tokens_scale": 5.0,
+      "model_name": "gpt-4-1106-preview",
+      "max_context_size": 16300,
+      "tokens_scale": 10.0,
       "generation_params": {
         "temperature": 0.7,
         "presence_penalty": 0.0,
@@ -48,7 +58,7 @@
     }
   },
   "last_messages_count": 18,
-  "global_mode": false,
+  "global_mode": true,
   "free_mode": false,
   "tokens_packages": {
     "by_default": "default",
@@ -63,16 +73,8 @@
   "bot_max_users_memory": 30,
   "instant_messages_waiting": 400,
   "documents": {
+    "blocks_size": 2000,
     "summary_blocks": 2,
-    "search_best_k": 8
-  },
-  "blip": {
-    "use_large": false,
-    "device": "cpu"
-  },
-  "blip_gpt_prompts": {
-    "joker": "Create a meme caption using the provided image, it shows: {image_caption}. Try to be ironic and funny. Try to avoid starting with 'when you'. Use only {lang} language. Give only caption as an answer.",
-    "basic": "Imagine that I sent you a picture, it shows: {image_caption}. Use only {lang} language. Give only caption as an answer.",
-    "caption_message": "{prompt}, In addition to image: {message}"
+    "search_best_k": 10
   }
 }

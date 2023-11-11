@@ -5,6 +5,8 @@
     "superior_model": true,
     "use_functions": true,
     "use_superior_as_default": false,
+    "stt_minutes": 10,
+    "max_image_gens": 5,
     "tokens": 40000,
     "price": 0,
     "duration": "3d"
@@ -15,6 +17,8 @@
     "superior_model": false,
     "use_functions": false,
     "use_superior_as_default": false,
+    "stt_minutes": 0,
+    "max_image_gens": 0,
     "tokens": 60000,
     "price": 0,
     "duration": "7d"
@@ -25,7 +29,9 @@
     "superior_model": false,
     "use_functions": false,
     "use_superior_as_default": false,
-    "tokens": 400000,
+    "stt_minutes": 0,
+    "max_image_gens": 10,
+    "tokens": 500000,
     "price": 140,
     "duration": "60d"
   },
@@ -35,8 +41,10 @@
     "superior_model": false,
     "use_functions": true,
     "use_superior_as_default": false,
-    "tokens": 600000,
-    "price": 220,
+    "stt_minutes": 0,
+    "max_image_gens": 15,
+    "tokens": 800000,
+    "price": 230,
     "duration": "60d"
   },
   "adept": {
@@ -45,8 +53,10 @@
     "superior_model": true,
     "use_functions": true,
     "use_superior_as_default": false,
-    "tokens": 1000000,
-    "price": 400,
+    "stt_minutes": 60,
+    "max_image_gens": 20,
+    "tokens": 1800000,
+    "price": 500,
     "duration": "60d"
   },
   "adept+": {
@@ -55,8 +65,10 @@
     "superior_model": true,
     "use_functions": true,
     "use_superior_as_default": false,
-    "tokens": 1500000,
-    "price": 600,
+    "stt_minutes": 80,
+    "max_image_gens": 30,
+    "tokens": 2500000,
+    "price": 700,
     "duration": "60d"
   },
   "pro": {
@@ -65,8 +77,10 @@
     "superior_model": true,
     "use_functions": true,
     "use_superior_as_default": true,
-    "tokens": 2000000,
-    "price": 1100,
+    "stt_minutes": 240,
+    "max_image_gens": 50,
+    "tokens": 4250000,
+    "price": 1200,
     "duration": "60d"
   },
   "pro+": {
@@ -75,8 +89,10 @@
     "superior_model": true,
     "use_functions": true,
     "use_superior_as_default": true,
-    "tokens": 3000000,
-    "price": 1650,
+    "stt_minutes": 300,
+    "max_image_gens": 60,
+    "tokens": 5500000,
+    "price": 1500,
     "duration": "60d"
   }
 }

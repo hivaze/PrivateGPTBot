@@ -5,7 +5,7 @@ from aiogram.utils.executor import Executor
 
 from app import settings
 from app.internals.bot_logic.bot_memory import LRUMutableMemoryStorage
-from app.internals.chat.chat_models import load_chat_model
+from app.internals.ai.chat_models import load_chat_model
 from app.utils.tg_bot_utils import session_auto_ended
 
 tg_bot = Bot(token=settings.config.TG_BOT_TOKEN)

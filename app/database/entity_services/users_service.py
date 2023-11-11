@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.database.sql_db_service import UserEntity, Role, UserSettings
-from app.database.entity_services.tokens_service import init_tokens_package, find_tokens_package
+from app.database.entity_services.tokens_packages_service import init_tokens_package, find_tokens_package
 from app.utils.tg_bot_utils import no_access_message
 
 logger = logging.getLogger(__name__)

@@ -21,8 +21,7 @@ def website_request(user: UserEntity, current_user_data: dict, url: str):
     """Parses information from a website via a link 'url'"""
     try:
         # vector_store: Chroma = current_user_data.get('vectorstore')
-        loader = AsyncHtmlLoader([url])
-        docs = loader.load()
+        docs = AsyncHtmlLoader([url], requests_kwargs={'timeout': 5}).load()
         docs = html2text.transform_documents(docs)
         docs = [clean_text(doc.page_content) for doc in docs]
         total_symbols = sum([len(doc) for doc in docs])

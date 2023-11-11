@@ -1,7 +1,11 @@
+"""
+DEPRECATED, will be removed
+"""
+
 import logging
 
 import torch
-from transformers import AutoProcessor, BlipForConditionalGeneration
+from transformers import AutoProcessor, BlipForConditionalGeneration, GenerationMixin
 
 from app.bot import settings
 

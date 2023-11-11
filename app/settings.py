@@ -13,17 +13,7 @@ logger = logging.getLogger(__name__)
 class DocumentsConfig(BaseModel):
     summary_blocks: int
     search_best_k: int
-
-
-class BlipConfig(BaseModel):
-    use_large: bool
-    device: str
-
-
-class BlipGptPrompts(BaseModel):
-    joker: str
-    basic: str
-    caption_message: str
+    blocks_size: int
 
 
 class EmbeddingsModelConfig(BaseModel):
@@ -32,7 +22,19 @@ class EmbeddingsModelConfig(BaseModel):
     embedding_ctx_length: int
 
 
-class ModelConfig(BaseModel):
+class AudioModelConfig(BaseModel):
+    type: str
+    model_name: str
+
+
+class ImageGenModelConfig(BaseModel):
+    type: str
+    model_name: str
+    size: str
+    quality: str
+
+
+class ChatModelConfig(BaseModel):
     type: str
     max_context_size: int
     model_name: str
@@ -46,15 +48,17 @@ class TokensPackagesConfig(BaseModel):
 
 
 class ModelsConfig(BaseModel):
-    small_context: ModelConfig
-    long_context: ModelConfig
-    superior: ModelConfig
+    small_context: ChatModelConfig
+    long_context: ChatModelConfig
+    superior: ChatModelConfig
 
 
 class BotConfig(BaseModel):
     OPENAI_KEY: str
     TG_BOT_TOKEN: str
     embeddings_model: EmbeddingsModelConfig
+    audio_transcript_model: AudioModelConfig
+    image_gen_model: ImageGenModelConfig
     models: ModelsConfig
     last_messages_count: int
     global_mode: bool
@@ -66,8 +70,6 @@ class BotConfig(BaseModel):
     append_tokens_count: bool
     openai_api_retries: int
     documents: DocumentsConfig
-    blip: BlipConfig
-    blip_gpt_prompts: BlipGptPrompts
 
 ##### Personalities
 
@@ -87,6 +89,8 @@ class TokensPackageConfig(BaseModel):
     superior_model: bool
     use_functions: bool
     use_superior_as_default: bool
+    stt_minutes: bool
+    max_image_gens: int
     tokens: int
     price: int
     duration: str
@@ -210,7 +214,7 @@ class MessagesConfig(BaseModel):
     custom_personality: CustomPersonality
     tokens: Tokens
     price_list: PriceList
-    image_forward: Dict[str, str]
+    image_upload: Dict[str, str]
     confirmation: Confirmation
 
 
