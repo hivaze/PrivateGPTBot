@@ -17,7 +17,8 @@ from app.database.entity_services.feedback_service import save_feedback
 from app.database.entity_services.global_messages_service import global_message, get_gmua
 from app.database.entity_services.messages_service import add_message_record, get_last_message, get_message_by_tgid
 from app.database.entity_services.tokens_service import tokens_spending, find_tokens_package, tokens_barrier
-from app.database.entity_services.users_service import get_users_with_filters, access_check, get_or_create_user
+from app.database.entity_services.users_service import get_users_with_filters, access_check, get_or_create_user, \
+    get_all_users
 from app.database.sql_db_service import MessageEntity, with_session, Reaction, UserEntity
 from app.handlers.exceptions_handler import zero_exception
 from app.internals.bot_logic.fsm_service import UserState, reset_user_state, switch_to_communication_state
@@ -146,10 +147,10 @@ async def admin_message(session: Session, user: UserEntity,
     lc = format_language_code(tg_user.language_code)
 
     data = await state.get_data()
-    users = get_users_with_filters(session)
+    users = get_users_with_filters(session) if not data['for_all'] else get_all_users(session)
 
     await message.answer(f'Now your message will be sent to {len(users)} users...')
-    await global_message(session, tg_user.id, users, message.text, do_markdown=data['do_markdown'])
+    await global_message(session, tg_user.id, users, message.text, do_html=data['do_html'])
     await message.answer('Done!')
 
     await reset_user_state(session, user, state)
@@ -167,8 +168,10 @@ async def admin_message(session: Session, user: UserEntity,
 @access_check
 async def communication_answer(session: Session, user: UserEntity,
                                message: types.Message, state: FSMContext,
-                               add_user_message_to_hist=True, do_superior=False,  is_image=False, has_document=False,
-                               function_call="auto", *args, **kwargs):
+                               add_user_message_to_hist=True, do_superior=False,
+                               is_image=False, has_document=False,
+                               function_call="auto", ignore_lock=False,
+                               *args, **kwargs):
     tg_user = message.from_user
     sent_message = None
     lc = format_language_code(tg_user.language_code)
@@ -178,7 +181,8 @@ async def communication_answer(session: Session, user: UserEntity,
     if not do_answer:
         return
 
-    await messages_lock.acquire()
+    if not ignore_lock:
+        await messages_lock.acquire()
 
     try:  # try-finally block for precise lock release
 
@@ -260,7 +264,7 @@ async def communication_answer(session: Session, user: UserEntity,
                                                        user_message=message,
                                                        bot_message=generation_result.message.text,
                                                        do_reply=instant_messages_buffer_size == 1,
-                                                       add_redo=instant_messages_buffer_size == 1)
+                                                       add_redo=instant_messages_buffer_size == 1 and not is_image)
             logger.info(f'AI answer sent to "{tg_user.username}" | "{tg_user.id}",'
                         f' personality: "{personality}",'
                         f' model: "{generation_result.model_config.model_name}",'
@@ -288,21 +292,24 @@ async def communication_answer(session: Session, user: UserEntity,
 
         if user.settings.enable_tokens_info:
             await message.reply(settings.messages.tokens.tokens_count[lc].format(
-                prompt_tokens=generation_result.prompt_tokens_usage * generation_result.model_config.tokens_scale,
-                completion_tokens=generation_result.completion_tokens_usage * generation_result.model_config.tokens_scale,
+                prompt_tokens=int(generation_result.prompt_tokens_usage * generation_result.model_config.tokens_scale),
+                completion_tokens=int(generation_result.completion_tokens_usage * generation_result.model_config.tokens_scale),
+                left_tokens=left_tokens,
             ), parse_mode='HTML')
 
         # Make function call
         if generation_result.is_function_call:
             async with TypingBlock(message.chat):
                 await message.reply(settings.messages.external_data[lc])
-                function_response = await execute_function_call(user, current_user_data, generation_result.message)
+                function_response = await asyncio.get_event_loop().run_in_executor(thread_pool,
+                                                                                   execute_function_call,
+                                                                                   user,
+                                                                                   current_user_data,
+                                                                                   generation_result.message)
 
             # Update chat history and release the lock
             history.add_message(function_response)
             await state.update_data({"history": history})
-            if messages_lock.locked():
-                messages_lock.release()
 
             # Call to get the final response
             await asyncio.get_event_loop().create_task(communication_answer(message,
@@ -311,7 +318,8 @@ async def communication_answer(session: Session, user: UserEntity,
                                                                             do_superior=do_superior,
                                                                             function_call="none",
                                                                             has_document=has_document,
-                                                                            is_image=is_image))
+                                                                            is_image=is_image,
+                                                                            ignore_lock=True))
             return
 
         # Check tokens in the end and reset the state to menu
@@ -330,7 +338,7 @@ async def communication_answer(session: Session, user: UserEntity,
         await state.update_data({"history": history})
 
     finally:
-        if messages_lock.locked():
+        if not ignore_lock and messages_lock.locked():
             messages_lock.release()
 
 
@@ -430,11 +438,11 @@ async def document_answer(session: Session,
         await message.answer(settings.messages.documents.loaded[lc])
 
 
-@dp.message_handler(state=UserState.communication, content_types=ContentType.AUDIO)
+@dp.message_handler(state=UserState.communication, content_types=ContentType.VOICE)
 @zero_exception
 @with_session
 @access_check
-async def audio_answer(session: Session,
+async def voice_answer(session: Session,
                        message: types.Message, state: FSMContext,
                        *args, **kwargs):
     tg_user = message.from_user
@@ -552,9 +560,9 @@ async def callback_query(session: Session, user: UserEntity,
                 related_to.regenerated = True
                 history.drop_last_arc()
                 await state.update_data({"history": history})
-                messages_lock.release()
                 await asyncio.get_event_loop().create_task(communication_answer(target_message,
                                                                                 do_superior=use_superior,
+                                                                                ignore_lock=True,
                                                                                 state=state))
             except:
                 await message.answer(settings.messages.redo.error[lc])

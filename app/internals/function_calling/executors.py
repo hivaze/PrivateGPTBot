@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 html2text = Html2TextTransformer()
 
 
-async def website_request(user: UserEntity, current_user_data: dict, url: str):
+def website_request(user: UserEntity, current_user_data: dict, url: str):
     """Parses information from a website via a link 'url'"""
     try:
+        # vector_store: Chroma = current_user_data.get('vectorstore')
         loader = AsyncHtmlLoader([url])
         docs = loader.load()
         docs = html2text.transform_documents(docs)
@@ -35,7 +36,7 @@ async def website_request(user: UserEntity, current_user_data: dict, url: str):
     return {"web_content": docs}
 
 
-async def search_in_document_query(user: UserEntity, current_user_data: dict, document_id: str, query: str):
+def search_in_document_query(user: UserEntity, current_user_data: dict, document_id: str, query: str):
     """Executes information search by 'query' in the document with id 'document_id'"""
     vector_store: Chroma = current_user_data.get('vectorstore')
     found_documents = vector_store.search(query,
@@ -47,7 +48,7 @@ async def search_in_document_query(user: UserEntity, current_user_data: dict, do
     return {"found": found_documents}
 
 
-async def get_tokens_balance(user: UserEntity, current_user_data: dict):
+def get_tokens_balance(user: UserEntity, current_user_data: dict):
     tokens_packages: List[TokensPackageEntity] = user.tokens_packages
     available_tokens = [tokens_package.left_tokens for tokens_package in tokens_packages]
     package_names = [tokens_package.package_name for tokens_package in tokens_packages]
@@ -68,13 +69,13 @@ FUNCTIONS_MAPPING: dict = {
 }
 
 
-async def execute_function_call(user: UserEntity,
-                                current_user_data: dict,
-                                message: FunctionCallMessage) -> FunctionResponseMessage:
+def execute_function_call(user: UserEntity,
+                          current_user_data: dict,
+                          message: FunctionCallMessage) -> FunctionResponseMessage:
     func_name = message.name
     assert func_name in FUNCTIONS_MAPPING.keys(), f"Function '{func_name}' is not supported"
 
     logger.info(f"Calling function '{func_name}' with args '{message.arguments}' for user '{user.user_id}'")
-    results = await FUNCTIONS_MAPPING[func_name](user, current_user_data, **message.arguments)
+    results = FUNCTIONS_MAPPING[func_name](user, current_user_data, **message.arguments)
 
     return FunctionResponseMessage(name=func_name, text=json.dumps(results, ensure_ascii=False))

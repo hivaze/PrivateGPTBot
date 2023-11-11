@@ -14,8 +14,8 @@
     "en": "Hello, this is your very smart and <b>personalized AI-assistant</b>.\nI am based on several neural networks, including ChatGPT by OpenAI.\n\nI don't do ads and I am partially <b>free</b> for everyone!\n\n<b>What can I do for all users</b>:\n- I use GPT-3.5 for answers\n- I can discuss any topic and solve any well-formulated problems\n- I understand forwarded messages from channels and chats and can summarize them\n- I can create custom characters tailored to your preferences\n- I can interpret images (though I can't generate them)\n- I can regenerate messages\n\n<b>And for users with extended access, I offer even more:</b>:\n- I can understand four times more information\n- I can utilize the advanced capabilities of GPT-4\n- I can handle any number of documents (pdf, docx, etc) simultaneously, I can summarize them and answer questions about their content\n- I can work with many websites and search for information on the Internet\n\nTo chat with me, choose a character or create your own. Your messages are not saved and remain private.\n\nWant to enjoy the benefits of extended access? Apply for an upgrade here:\nhttps://docs.google.com/forms/d/1o5msFS19oyoRF9XEXysohVtP5cG8vUeu9WZoSgahpYo\n\nFind out your account stats using /account"
   },
   "account_info": {
-    "ru" : "<b>Информация об аккаунте</b>:\n\nДата регистрации: <b>{registration_date}</b>\n\nОтправлено <b>{messages_count}</b> сгенерированных сообщений\nВсего использовано токенов: <b>{used_tokens}</b>\n\nВаш текущий пакет токенов: <b>{tokens_package_name}</b>\nСколько вам доступно токенов: <b>{left_tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nПакет заканчивается: <b>{expires_at}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nДокументы и интернет: <b>{functions}</b>",
-    "en": "<b>Account information</b>:\n\nRegistration date: <b>{registration_date}</b>\n\nSent <b>{messages_count}</b> messages generated\nTokens used in total: <b>{used_tokens}</b>\n\nYour current token package: <b>{tokens_package_name}</b>\nAvailable tokens: <b>{left_tokens}</b>\nThis is approximately: <b>{approx_messages}</b> messages\nThe package expires: <b>{expires_at}</b>\n\nLong context: <b>{long_context}</b>\nGPT-4 availability: <b>{superior_model}</b>\nDocuments and Internet: <b>{functions}</b>"
+    "ru" : "<b>Информация об аккаунте</b>:\n\nДата регистрации: <b>{registration_date}</b>\n\nОтправлено <b>{messages_count}</b> сгенерированных сообщений\nДоля переделанных сообщений: <b>{regenerated_part}%</b>\nДоля GPT-4: <b>{superior_part}%</b>\n\nВаш текущий пакет токенов: <b>{tokens_package_name}</b>\nСколько вам доступно токенов: <b>{left_tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nПакет заканчивается: <b>{expires_at}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nДокументы и интернет: <b>{functions}</b>",
+    "en": "<b>Account information</b>:\n\nRegistration date: <b>{registration_date}</b>\n\nSent <b>{messages_count}</b> generated messages\nReworked messages share: <b>{regenerated_part}%</b>\nShare of GPT-4: <b>{superior_part}%</b>\n\nYour current token package: <b>{tokens_package_name}</b>\nAvailable tokens: <b>{left_tokens}</b>\nThis is approximately: <b>{approx_messages}</b> messages\nThe package expires: <b>{expires_at}</b>\n\nLong context: <b>{long_context}</b>\nGPT-4 availability: <b>{superior_model}</b>\nDocuments and Internet: <b>{functions}</b>"
   },
   "reset": {
     "ru": "История общения с предыдущим персонажем забыта, можешь выбирать нового",
@@ -58,7 +58,7 @@
     },
     "loaded": {
       "ru": "Ваш документ успешно загружен. Теперь бот сможет использовать информацию из него.",
-      "em": "Your document has been uploaded successfully. The bot will now be able to use the information from it."
+      "en": "Your document has been uploaded successfully. The bot will now be able to use the information from it."
     }
   },
   "audio": {
@@ -239,8 +239,8 @@
       "en": "You ran out of tokens, but your package has been updated to a new one, level: {package_name}"
     },
     "tokens_count": {
-      "ru": "<b>Использование токенов</b>:\nИстория и твое сообщение: <b>{prompt_tokens}</b>\nГенерация: <b>{completion_tokens}</b>",
-      "en": "<b>Tokens usage</b>:\nHistory and your message: <b>{prompt_tokens}</b>\nGeneration: <b>{completion_tokens}</b>"
+      "ru": "<b>Использование токенов</b>:\nИстория и твое сообщение: <b>{prompt_tokens}</b>\nГенерация: <b>{completion_tokens}</b>\nОсталось в пакете: <b>{left_tokens}</b>",
+      "en": "<b>Tokens usage</b>:\nHistory and your message: <b>{prompt_tokens}</b>\nGeneration: <b>{completion_tokens}</b>\nLeft in package amount: <b>{left_tokens}</b>"
     },
     "running_out": {
       "ru": "Ваш пакет токенов заканчивается :( У вас осталось меньше 10% токенов.",
@@ -253,8 +253,8 @@
   },
   "price_list": {
     "info": {
-      "ru": "Ниже представлено описание существующих пакетов сообщений.\n<i>Важно помнить что при генерации с использование GPT-4, тратится в 5 раз больше токенов.</i>\n\nВаш текущий пакет: <b>{package_name}</b>",
-      "en": "Ниже представлено описание существующих пакетов сообщений.\n<i>Важно помнить что при генерации с использование GPT-4, тратится в 5 раз больше токенов.</i>\n\nВаш текущий пакет: <b>{package_name}</b>"
+      "ru": "Ниже представлено описание существующих пакетов сообщений.\n<i>Важно помнить что при генерации с использованием GPT-4, тратится в 5 раз больше токенов.</i>\n\nВаш текущий пакет: <b>{package_name}</b>",
+      "en": "Ниже представлено описание существующих пакетов сообщений.\n<i>Важно помнить что при генерации с использованием GPT-4, тратится в 5 раз больше токенов.</i>\n\nВаш текущий пакет: <b>{package_name}</b>"
     },
     "package_info": {
       "ru": "<b>Пакет {name}</b>:\n\nЦена: <b>{price} рублей</b>\n\nКоличество токенов: <b>{tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nВыдается на: <b>{duration}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nВозможность использовать GPT-4 по умолчанию: <b>{superior_model_as_default}</b>\nДокументы и интернет: <b>{functions}</b>",

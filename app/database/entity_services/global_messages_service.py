@@ -18,9 +18,9 @@ def get_gmua(session: Session, user: UserEntity, tg_message_id: int) -> GlobalMe
     return association
 
 
-async def global_message(session: Session, from_user: int, users: list, text: str, do_markdown: bool = False):
+async def global_message(session: Session, from_user: int, users: list, text: str, do_html: bool = False):
     logger.info(f"Admin initialized global message:\n{text[:50]}...")
-    parse_mode = 'Markdown' if do_markdown else None
+    parse_mode = 'HTML' if do_html else None
     created_at = datetime.now()
 
     gm = GlobalMessageEntity(text=text, from_user=from_user, created_at=created_at)

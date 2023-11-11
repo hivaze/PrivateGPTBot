@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 from datetime import datetime
 
 import numpy as np
@@ -8,16 +9,19 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.bot import dp, tg_bot
-from app.database.sql_db_service import with_session, UserEntity
+from app.database.entity_services.feedback_service import get_week_feedbacks
+from app.database.sql_db_service import with_session, UserEntity, Role
 from app.database.entity_services.messages_service import get_all_messages, get_avg_hist_size_by_user, \
     get_avg_tokens_by_user, \
     get_avg_tokens_per_message, get_avg_messages_by_user
 from app.database.entity_services.tokens_service import tokens_barrier, add_new_tokens_package, find_tokens_package
 from app.database.entity_services.users_service import access_check, check_is_admin, get_all_users, \
-    get_user_by_id, set_ban_userid
+    get_user_by_id, set_ban_userid, get_users_with_filters
 from app.handlers.exceptions_handler import zero_exception
 from app.internals.bot_logic.fsm_service import reset_user_state, UserState
-from app.utils.tg_bot_utils import build_menu_markup, format_language_code
+
+from app.utils.tg_bot_utils import build_menu_markup, format_language_code, build_price_markup
+
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +56,26 @@ async def welcome_user(session: Session, user: UserEntity,
     await message.answer(**reply_message)
 
 
+# @dp.message_handler(commands=["stop"], state='*')
+# @zero_exception
+# @with_session
+# @access_check
+# async def stop_generation(session: Session, user: UserEntity,
+#                        message: types.Message, state: FSMContext,
+#                        *args, **kwargs):
+#     tg_user = message.from_user
+#     lc = format_language_code(tg_user.language_code)
+#
+#     await reset_user_state(session, user, state)
+#
+#     reply_message = {
+#         'text': text,
+#         'reply_markup': build_menu_markup(lc),
+#         'parse_mode': 'HTML'
+#     }
+#     await message.answer(**reply_message)
+
+
 @dp.message_handler(commands=["account"], state='*')
 @zero_exception
 @with_session
@@ -74,7 +98,9 @@ async def account_status(session: Session, user: UserEntity,
     tokens_package_config = settings.tokens_packages.get(tokens_package.package_name, 'default')
 
     messages = user.messages
-    used_tokens = sum([m.total_tokens for m in messages])
+    models_counter = Counter([m.model for m in messages])
+    superior_part = round(models_counter[settings.config.models.superior.model_name] * 100 / (len(messages) or 1), 3)
+    regenerated_part = round(sum([m.regenerated for m in messages if m.regenerated is not None]) * 100 / (len(messages) or 1), 3)
     avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
 
     long_context = settings.messages.confirmation.yes[lc] if tokens_package_config.long_context else settings.messages.confirmation.no[lc]
@@ -84,7 +110,8 @@ async def account_status(session: Session, user: UserEntity,
     info_message = settings.messages.account_info[lc]
     info_message = info_message.format(registration_date=user.joined_at.strftime("%Y-%m-%d %H:%M"),
                                        messages_count=len(messages),
-                                       used_tokens=used_tokens,
+                                       superior_part=superior_part,
+                                       regenerated_part=regenerated_part,
                                        left_tokens=tokens_package.left_tokens,
                                        approx_messages=tokens_package.left_tokens // avg_t_m,
                                        tokens_package_name=tokens_package.package_name.upper(),
@@ -92,8 +119,43 @@ async def account_status(session: Session, user: UserEntity,
                                        functions=functions,
                                        long_context=long_context,
                                        superior_model=superior_model)
-
     await message.answer(info_message, parse_mode='HTML')
+
+
+@dp.message_handler(commands=["price_list"], state='*')
+@zero_exception
+@with_session
+@access_check
+async def price_list(session: Session, user: UserEntity,
+                     message: types.Message, state: FSMContext,
+                     *args, **kwargs):
+
+    lc = format_language_code(user.language_code)
+    current_package = find_tokens_package(session, user.user_id)
+    avg_t_m = max(min(get_avg_tokens_per_message(session) or 1500, 3000), 1500)
+
+    await message.answer(settings.messages.price_list.info[lc].format(package_name=current_package.package_name.upper()),
+                         parse_mode='HTML')
+
+    for name, package in settings.tokens_packages.items():
+        if package.level < 2:
+            continue
+
+        long_context = settings.messages.confirmation.yes[lc] if package.long_context else settings.messages.confirmation.no[lc]
+        superior_model = settings.messages.confirmation.yes[lc] if package.superior_model else settings.messages.confirmation.no[lc]
+        functions = settings.messages.confirmation.yes[lc] if package.use_functions else settings.messages.confirmation.no[lc]
+        superior_as_default = settings.messages.confirmation.yes[lc] if package.use_superior_as_default else settings.messages.confirmation.no[lc]
+
+        info = settings.messages.price_list.package_info[lc].format(name=name.upper(),
+                                                                    tokens=package.tokens,
+                                                                    approx_messages=package.tokens // avg_t_m,
+                                                                    duration=package.duration,
+                                                                    price=package.price,
+                                                                    long_context=long_context,
+                                                                    superior_model=superior_model,
+                                                                    superior_model_as_default=superior_as_default,
+                                                                    functions=functions)
+        await message.answer(info, parse_mode='HTML', reply_markup=build_price_markup(lc, name, package.price))
 
 
 @dp.message_handler(commands=["grant_package"], state='*')
@@ -119,6 +181,46 @@ async def grant_package(session: Session, user: UserEntity,
             await message.answer(f'User {other_id} does not exits')
 
 
+@dp.message_handler(commands=["grant_role"], state='*')
+@zero_exception
+@with_session
+@access_check
+async def grant_role(session: Session, user: UserEntity,
+                     message: types.Message, state: FSMContext,
+                     *args, **kwargs):
+    if check_is_admin(user.user_name):
+        other_id = int(message.text.split(' ')[1])
+        role_name = message.text.split(' ')[2].upper()
+        if role_name not in ['PRIVILEGED', 'DEFAULT']:
+            await message.answer(f'Role {role_name} does not exits')
+            return
+
+        other_user = get_user_by_id(session, other_id)
+        if other_user:
+            other_user.role = Role[role_name]
+            await message.answer(
+                f"Role {role_name} granted to user '{other_user.user_id}' | '{other_user.user_name}'!")
+        else:
+            await message.answer(f'User {other_id} does not exits')
+
+
+@dp.message_handler(commands=["feedback_list"], state='*')
+@zero_exception
+@with_session
+@access_check
+async def feedback_list(session: Session, user: UserEntity,
+                        message: types.Message, state: FSMContext,
+                        *args, **kwargs):
+    if check_is_admin(user.user_name):
+        feedbacks = get_week_feedbacks(session)
+        if not feedbacks:
+            await message.answer("No feedbacks last week")
+            return
+        for feedback in feedbacks:
+            user = get_user_by_id(session, feedback.user_id)
+            await message.answer(f"Feedback from user '{user.user_id}' | '{user.user_name}' at {feedback.created_at.strftime('%Y-%m-%d %H:%M')}:\n\n{feedback.text}")
+
+
 @dp.message_handler(commands=["send_message"], state=UserState.menu)
 @zero_exception
 @with_session
@@ -126,17 +228,23 @@ async def send_message(session: Session,
                        message: types.Message, state: FSMContext,
                        *args, **kwargs):
     tg_user = message.from_user
-    do_markdown = message.text.split(' ').__len__() > 1
 
-    if check_is_admin(tg_user.username):
+    if not check_is_admin(tg_user.username):
+        return
+
+    try:
+        do_html = bool(message.text.split(' ')[1])
+        for_all = bool(message.text.split(' ')[2])
         await UserState.admin_message.set()
-        await state.update_data({'do_markdown': do_markdown})
+        await state.update_data({'do_html': do_html, 'for_all': for_all})
         reply_message = {
-            'text': f'In the next message, write a message that will be sent to all known users.'
-                    f' Users count: {len(get_all_users(session))}',
+            'text': f'In the next message, write a message that will be sent to all known users.\n'
+                    f'GMs-enabled users count: {len(get_users_with_filters(session))}',
             'reply_markup': types.ReplyKeyboardRemove()
         }
         await message.answer(**reply_message)
+    except:
+        await message.answer("Format: /send_message bool(do_html) bool(for_all)")
 
 
 # @dp.message_handler(commands=["send_db"], state=UserState.menu)
@@ -205,14 +313,18 @@ async def status(session: Session,
         today_messages = [m for m in all_messages if m.executed_at.date() == datetime.today().date()]
         today_unique_users = np.unique([m.user_id for m in today_messages])
         week_messages = [m for m in all_messages if (datetime.today() - m.executed_at).days < 7]
+        week_regenerated_part = round(
+            sum([m.regenerated for m in week_messages if m.regenerated is not None]) * 100 / len(week_messages), 3)
         week_unique_users = np.unique([m.user_id for m in week_messages])
         all_users = get_all_users(session)
+        filtered_users = get_users_with_filters(session)
         today_new_users = [user for user in all_users if user.joined_at.date() == datetime.today().date()]
         week_new_users = [user for user in all_users if (datetime.today() - user.joined_at).days < 7]
         reply_message = {
             'text': f'<b>Chatbot status</b>\n\n'
                     f'<i>Users:</i>\n\n'
                     f'Total users count: {len(all_users)}\n'
+                    f'Users count with GM and no ban: {len(filtered_users)}\n'
                     f'Week new users: {len(week_new_users)}\n'
                     f'Week unique users: {len(week_unique_users)}\n'
                     f'Today new users: {len(today_new_users)}\n'
@@ -220,6 +332,7 @@ async def status(session: Session,
                     f'<i>Messages:</i>\n\n'
                     f'Total messages count: {len(all_messages)}\n'
                     f'Week messages count: {len(week_messages)}\n'
+                    f'Week perc. of regenerated: {week_regenerated_part}%\n'
                     f'Week avg. user messages count: {round(get_avg_messages_by_user(session), 2)}\n'
                     f'Today messages count: {len(today_messages)}\n'
                     f'Week avg. user history size: {round(get_avg_hist_size_by_user(session), 2)}\n\n'
