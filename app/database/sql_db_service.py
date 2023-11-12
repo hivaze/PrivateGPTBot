@@ -37,7 +37,7 @@ class FeedbackEntity(Base):
     id = Column("id", Integer, primary_key=True)
 
     user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
-    tg_message_id = Column(Integer, nullable=True)
+    tg_message_id = Column(Integer, nullable=True)  # new field
 
     created_at = Column(DateTime, nullable=False)
     text = Column(String(), nullable=False)
@@ -89,11 +89,11 @@ class TokensPackageEntity(Base):
     package_name = Column(String(20), nullable=False)
     level = Column(Integer, nullable=False)
     left_tokens = Column(Integer, default=0, nullable=False)
-    left_images = Column(Integer, default=0, nullable=False)
-    left_stt_minutes = Column(Integer, default=0, nullable=False)
+    left_images = Column(Integer, default=0, nullable=False)  # new field
+    left_stt_minutes = Column(Integer, default=0, nullable=False)  # new field
 
 
-class UserSettings(Base):
+class UserSettingsEntity(Base):
     __tablename__ = "user_settings"
 
     id = Column("id", Integer, primary_key=True)
@@ -107,10 +107,21 @@ class UserSettings(Base):
     use_superior_by_default = Column(Boolean, default=False, nullable=False)
 
 
+class ReferralLinkEntity(Base):
+    __tablename__ = "referral_links"
+
+    id = Column("id", Integer, primary_key=True)
+
+    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
+
+    referred_count = Column(Integer, default=0)
+
+
 class UserEntity(Base):
     __tablename__ = "users"
 
     user_id = Column(BigInteger, primary_key=True, index=True)
+    referred_by = Column(Integer, ForeignKey('referral_links.id'), nullable=True)  # new field
 
     user_name = Column(String(50), nullable=True)
     first_name = Column(String(50), nullable=True)
@@ -127,6 +138,9 @@ class UserEntity(Base):
     settings = relationship("UserSettings",
                             backref="user", uselist=False,
                             cascade="all, delete-orphan")
+    referral_link = relationship("ReferralLinkEntity",
+                                 backref="user", uselist=False,
+                                 cascade="all, delete-orphan")
     messages = relationship("MessageEntity",
                             backref="user",
                             cascade="all, delete-orphan")
@@ -166,7 +180,7 @@ class MessageEntity(Base):
 
     instant_buffer = Column(Integer, default=1, nullable=False)
     has_image = Column(Boolean, default=False, nullable=False)
-    has_audio = Column(Boolean, default=False, nullable=False)
+    has_audio = Column(Boolean, default=False, nullable=False)  # new field
     has_document = Column(Boolean, default=False, nullable=False)
     function_call = Column(String(50), nullable=True)
 

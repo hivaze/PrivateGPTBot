@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import settings
-from app.database.sql_db_service import UserEntity, Role, UserSettings
+from app.database.sql_db_service import UserEntity, Role, UserSettingsEntity, ReferralLinkEntity
 from app.database.entity_services.tokens_packages_service import init_tokens_package, find_tokens_package
 from app.utils.tg_bot_utils import no_access_message
 
@@ -37,8 +37,9 @@ def _create_user_kwargs(session: Session, **kwargs) -> UserEntity:
     return user_entity
 
 
-def _create_user_tg(session: Session, tg_user: User) -> UserEntity:
+def _create_user_tg(session: Session, tg_user: User, referral_code: str = None) -> UserEntity:
     logger.info(f"Creating new user in DB with id {tg_user.id}")
+    # TODO: Add referral link search
     user_entity = UserEntity(user_id=tg_user.id,
                              user_name=tg_user.username,
                              first_name=tg_user.first_name,
@@ -46,7 +47,8 @@ def _create_user_tg(session: Session, tg_user: User) -> UserEntity:
                              ban=not settings.config.global_mode and not check_is_admin(tg_user.username),
                              role=Role.DEFAULT,
                              joined_at=datetime.now())
-    user_entity.settings = UserSettings()
+    user_entity.settings = UserSettingsEntity()
+    user_entity.referral_link = ReferralLinkEntity()
     session.add(user_entity)
     init_tokens_package(session, user_entity, package_name=settings.config.tokens_packages.as_first)
     session.commit()
@@ -66,7 +68,9 @@ def get_or_create_user(session: Session, tg_user: User) -> UserEntity:
     user = get_user_by_id(session, tg_user.id)
     if user is not None:
         if user.settings is None:
-            user.settings = UserSettings()
+            user.settings = UserSettingsEntity()
+        if user.referral_link is None:
+            user.referral_link = ReferralLinkEntity()
         if find_tokens_package(session, tg_user.id) is None:
             init_tokens_package(session, user)
         if user.user_name != tg_user.username:
@@ -87,8 +91,8 @@ def get_all_users(session: Session):
 
 def get_users_with_filters(session, ban_status=False, global_messages_status=True):
     users_with_settings = session.query(UserEntity).\
-        join(UserSettings, UserEntity.user_id == UserSettings.user_id).\
-        filter((UserEntity.ban == ban_status) & (UserSettings.allow_global_messages == global_messages_status)).all()
+        join(UserSettingsEntity, UserEntity.user_id == UserSettingsEntity.user_id).\
+        filter((UserEntity.ban == ban_status) & (UserSettingsEntity.allow_global_messages == global_messages_status)).all()
 
     return users_with_settings
 

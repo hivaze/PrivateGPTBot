@@ -142,6 +142,7 @@ async def admin_message(session: Session, user: UserEntity,
     tg_user = message.from_user
     lc = format_language_code(tg_user.language_code)
 
+    # TODO: Fix all users list here
     data = await state.get_data()
     users = get_users_with_filters(session) if not data['for_all'] else get_all_users(session)
 
@@ -260,7 +261,8 @@ async def communication_answer(session: Session, user: UserEntity,
                                                        user_message=message,
                                                        bot_message=generation_result.message.text,
                                                        do_reply=instant_messages_buffer_size == 1,
-                                                       add_redo=instant_messages_buffer_size == 1 and not is_image)
+                                                       add_continue=generation_result.is_stopped_by_limit,
+                                                       add_redo=instant_messages_buffer_size == 1)
             logger.info(f'AI answer sent to "{tg_user.username}" | "{tg_user.id}",'
                         f' personality: "{personality}",'
                         f' model: "{generation_result.model_config.model_name}",'
@@ -297,6 +299,7 @@ async def communication_answer(session: Session, user: UserEntity,
         # Make function call
         if generation_result.is_function_call:
             async with TypingBlock(message.chat):
+                # TODO: Maybe add some additional info for external_data message?
                 await message.reply(settings.messages.external_data[lc])
                 function_response = await asyncio.get_event_loop().run_in_executor(thread_pool,
                                                                                    execute_function_call,
@@ -349,9 +352,9 @@ async def photo_answer(message: types.Message, state: FSMContext, *args, **kwarg
 
     # current_user_data = await state.get_data()
 
-    await message.reply(settings.messages.image_forward[lc])
+    await message.reply(settings.messages.image_upload[lc])
     message.text = message.caption
-    asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=False))
+    asyncio.get_event_loop().create_task(communication_answer(message, state=state, is_image=True))
 
     # file_info = await message.bot.get_file(message.photo[-1].file_id)
     #
@@ -541,6 +544,10 @@ async def callback_query(session: Session, user: UserEntity,
             finally:
                 if messages_lock.locked():
                     messages_lock.release()
+
+        if messages_action.startswith('continue'):
+            # TODO: Add continue function (idk how to do this...)
+            pass
 
     else:
         await message.answer()

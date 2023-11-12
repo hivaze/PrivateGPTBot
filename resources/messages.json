@@ -261,6 +261,10 @@
       "en": "<b>Пакет {name}</b>:\n\nЦена: <b>{price} рублей</b>\n\nКоличество токенов: <b>{tokens}</b>\nЭто примерно: <b>{approx_messages}</b> сообщений\nВыдается на: <b>{duration}</b>\n\nДлинный контекст: <b>{long_context}</b>\nНаличие GPT-4: <b>{superior_model}</b>\nВозможность использовать GPT-4 по умолчанию: <b>{superior_model_as_default}</b>\nДокументы и интернет: <b>{functions}</b>"
     }
   },
+  "cont": {
+    "ru": "Продолжить",
+    "en": "Continue"
+  },
   "image_upload": {
     "ru": "Поддержки понимания картинок на данный момент нет, будет использоваться только текст.\nСкоро ассистент сможет понимать их содержимое, следите за обновлениями!",
     "en": "Image understanding is not supported at the moment, only text will be used.\nSoon the assistant will be able to understand their contents, stay tuned!"

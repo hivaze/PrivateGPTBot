@@ -203,10 +203,15 @@ async def update_gmua_reaction_markup(user: UserEntity, gmua: GlobalMessagesUser
 
 def build_message_markup(user: UserEntity,
                          last_message: MessageEntity = None,
-                         with_redo: bool = True) -> InlineKeyboardMarkup:
+                         with_redo: bool = True,
+                         add_continue: bool = False) -> InlineKeyboardMarkup:
     lc = format_language_code(user.language_code)
     markup = InlineKeyboardMarkup(row_width=2)
 
+    if add_continue:
+        continue_button_name = settings.messages.cont[lc]
+        continue_btn = InlineKeyboardButton(continue_button_name, callback_data='messages|continue')
+        markup.add(continue_btn)
     if user.settings.enable_reactions:
         if last_message is None or last_message.reaction is None:
             like = InlineKeyboardButton(settings.messages.reactions.good[lc], callback_data='messages|like')
@@ -249,8 +254,9 @@ async def send_response_message(user: UserEntity,
                                 user_message: Message,
                                 bot_message: str,
                                 do_reply: bool,
+                                add_continue: bool,
                                 add_redo=True) -> Message:
-    markup = build_message_markup(user, last_message=None, with_redo=add_redo)
+    markup = build_message_markup(user, last_message=None, with_redo=add_redo, add_continue=add_continue)
     if do_reply:
         try:
             sent_message = await user_message.reply(bot_message, reply_markup=markup)
@@ -262,6 +268,7 @@ async def send_response_message(user: UserEntity,
 
 
 def build_menu_markup(language_code: str) -> types.ReplyKeyboardMarkup:
+    # TODO: Add Referral and Buy buttons
     markup = [types.KeyboardButton(v.name[language_code])
               for k, v in settings.personalities.items() if v.location == 'main']
     markup += [types.KeyboardButton(settings.messages.main_menu.specialities[language_code])]

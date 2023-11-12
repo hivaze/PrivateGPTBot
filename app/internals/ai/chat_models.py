@@ -6,13 +6,16 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import openai
+from openai import chat, audio, images
 import tiktoken
-from openai.openai_object import OpenAIObject
+from openai.types.chat import ChatCompletion
+
+# from openai.types import
 
 from app import settings
 from app.internals.chat.chat_history import ChatHistory, ChatMessage, ChatRole, FunctionCallMessage, \
     FunctionResponseMessage
-from app.settings import ModelConfig
+from app.settings import ChatModelConfig
 from app.utils.misc import percent_trim_list
 
 logger = logging.getLogger(__name__)
@@ -30,12 +33,13 @@ class TextGenerationResult:
     completion_tokens_usage: int
     total_tokens_usage: int
     retires_count: int
-    model_config: ModelConfig
+    is_stopped_by_limit: bool
+    model_config: ChatModelConfig
 
 
 class BaseChatModel(ABC):
 
-    def __init__(self, config: ModelConfig):
+    def __init__(self, config: ChatModelConfig):
         self.config = config
         tokens_field = 'max_tokens' if 'max_tokens' in self.config.generation_params.keys() else 'max_new_tokens'
         self.max_gen_tokens = self.config.generation_params.get(tokens_field, 856)
@@ -122,7 +126,7 @@ class OpenAIChatModel(BaseChatModel):
     }
     TEXT_ROLES_MAPPING = {v: k for k, v in ROLES_TEXT_MAPPING.items()}
 
-    def __init__(self, config: ModelConfig):
+    def __init__(self, config: ChatModelConfig):
         super().__init__(config)
         self.tokenizer = tiktoken.encoding_for_model(self.config.model_name)
 
@@ -204,17 +208,19 @@ class OpenAIChatModel(BaseChatModel):
         start_time = int(time.time() * 1000)
         for i in range(settings.config.openai_api_retries):
             try:
+                # TODO: fix for new api 1
                 if functions is not None and len(functions) > 0:  # openai.error.InvalidRequestError fix
-                    response: OpenAIObject = openai.ChatCompletion.create(messages=formatted_history,
-                                                                          model=self.config.model_name,
-                                                                          functions=functions,
-                                                                          function_call=function_call,
-                                                                          **self.config.generation_params)
+                    response: ChatCompletion = chat.completions.create(messages=formatted_history,
+                                                                       model=self.config.model_name,
+                                                                       functions=functions,
+                                                                       function_call=function_call,
+                                                                       **self.config.generation_params)
                 else:
-                    response: OpenAIObject = openai.ChatCompletion.create(messages=formatted_history,
-                                                                          model=self.config.model_name,
-                                                                          **self.config.generation_params)
+                    response: ChatCompletion = chat.completions.create(messages=formatted_history,
+                                                                       model=self.config.model_name,
+                                                                       **self.config.generation_params)
                 time_taken = int(time.time() * 1000) - start_time
+                # TODO: fix for new api 2
                 is_function_call = self._is_function_call(response['choices'][0]['message'])
                 chat_message = self._parse_output(response['choices'][0]['message'], is_function_call)
                 return TextGenerationResult(message=chat_message,
@@ -224,13 +230,14 @@ class OpenAIChatModel(BaseChatModel):
                                             completion_tokens_usage=response['usage']['completion_tokens'],
                                             total_tokens_usage=response['usage']['total_tokens'],
                                             model_config=self.config,
+                                            is_stopped_by_limit=response['choices'][0]['finish_reason'] == 'length',
                                             retires_count=i)
-            except (openai.error.APIError, openai.error.RateLimitError) as e:
+            except (openai.APIError, openai.RateLimitError) as e:
                 logger.warning(f"Got exception from OpenAI: {e}")
                 time.sleep(2 ** i)  # wait longer
 
 
-def load_chat_model(model_config: ModelConfig) -> BaseChatModel:
+def load_chat_model(model_config: ChatModelConfig) -> BaseChatModel:
     assert model_config.type in ['open-ai'], f"{model_config.type} is not supported model type"
     if model_config.type == 'open-ai':
         return OpenAIChatModel(model_config)

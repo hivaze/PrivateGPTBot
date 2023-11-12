@@ -19,6 +19,7 @@ html2text = Html2TextTransformer()
 
 def website_request(user: UserEntity, current_user_data: dict, url: str):
     """Parses information from a website via a link 'url'"""
+    # TODO: Add user_request param to do vector search in splits (use 'summary' reqeust if not specified)
     try:
         # vector_store: Chroma = current_user_data.get('vectorstore')
         docs = AsyncHtmlLoader([url], requests_kwargs={'timeout': 5}).load()

@@ -210,6 +210,7 @@ class MessagesConfig(BaseModel):
     feedback: Feedback
     reactions: Reactions
     redo: Redo
+    cont: Dict[str, str]
     time_format: Dict[str, str]
     custom_personality: CustomPersonality
     tokens: Tokens

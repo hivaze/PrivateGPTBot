@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from aiogram.dispatcher import FSMContext
 
+# TODO: Change website_request function, add generate image function
 OPENAI_FUNCTIONS = [
     {
         "name": "search_in_document_query",
