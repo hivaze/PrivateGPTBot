@@ -114,7 +114,9 @@ class ReferralLinkEntity(Base):
 
     user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
 
-    referred_count = Column(Integer, default=0)
+    referred_users = relationship("UserEntity",
+                                  backref="referred_by_link",
+                                  cascade="all, delete-orphan")
 
 
 class UserEntity(Base):
@@ -135,7 +137,7 @@ class UserEntity(Base):
     tokens_packages = relationship("TokensPackageEntity",
                                    backref="user",
                                    cascade="all, delete-orphan")
-    settings = relationship("UserSettings",
+    settings = relationship("UserSettingsEntity",
                             backref="user", uselist=False,
                             cascade="all, delete-orphan")
     referral_link = relationship("ReferralLinkEntity",

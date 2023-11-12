@@ -166,7 +166,7 @@ async def admin_message(session: Session, user: UserEntity,
 async def communication_answer(session: Session, user: UserEntity,
                                message: types.Message, state: FSMContext,
                                add_user_message_to_hist=True, do_superior=False,
-                               is_image=False, has_document=False,
+                               is_image=False, has_document=False, has_audio=False,
                                function_call="auto", ignore_lock=False,
                                *args, **kwargs):
     tg_user = message.from_user
@@ -281,6 +281,7 @@ async def communication_answer(session: Session, user: UserEntity,
                                          history_size=len(history),
                                          instant_buffer=instant_messages_buffer_size,
                                          has_image=is_image,
+                                         has_audio=has_audio,
                                          has_document=has_document,
                                          function_call=generation_result.message.name if generation_result.is_function_call else None,
                                          regenerated=False))
@@ -546,7 +547,7 @@ async def callback_query(session: Session, user: UserEntity,
                     messages_lock.release()
 
         if messages_action.startswith('continue'):
-            # TODO: Add continue function (idk how to do this...)
+            # TODO: Add continue function (idk how to do this...), maybe add last message obj to fsm dict
             pass
 
     else:

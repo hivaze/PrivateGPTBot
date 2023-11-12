@@ -6,8 +6,13 @@ from sqlalchemy.orm import Session
 
 from app.database.sql_db_service import FeedbackEntity, UserEntity
 
-
 logger = logging.getLogger(__name__)
+
+
+def get_feedback_by_id(session: Session,
+                       feedback_id: int) -> FeedbackEntity:
+    result = session.scalars(select(FeedbackEntity).where(FeedbackEntity.id == feedback_id))
+    return result.first()
 
 
 def save_feedback(session: Session, user: UserEntity, text: str):

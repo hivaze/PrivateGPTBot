@@ -10,8 +10,6 @@ services:
     image: ghcr.io/chroma-core/chroma:latest
     volumes:
       - index_data:/chroma/.chroma/index
-    ports:
-      - "8003:8000"
     networks:
       - net
 
@@ -24,18 +22,22 @@ services:
     volumes:
       - ./app:/bot/app
       - ./resources:/bot/resources
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${POSTGRES_PORT}
     networks:
       - net
 
   postgres:
     image: postgres:14.1-alpine
     environment:
-      POSTGRES_USER: "test_user"
-      POSTGRES_PASSWORD: "testPassword123"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       POSTGRES_DB: "app_db"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     ports:
-      - "54312:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - bot-data:/var/lib/postgresql/data
     networks:

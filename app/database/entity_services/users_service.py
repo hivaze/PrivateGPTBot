@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import settings
+from app.database.entity_services.referral_link_service import get_reflink_by_id
 from app.database.sql_db_service import UserEntity, Role, UserSettingsEntity, ReferralLinkEntity
 from app.database.entity_services.tokens_packages_service import init_tokens_package, find_tokens_package
 from app.utils.tg_bot_utils import no_access_message
@@ -39,14 +40,16 @@ def _create_user_kwargs(session: Session, **kwargs) -> UserEntity:
 
 def _create_user_tg(session: Session, tg_user: User, referral_code: str = None) -> UserEntity:
     logger.info(f"Creating new user in DB with id {tg_user.id}")
-    # TODO: Add referral link search
+    ref_link = get_reflink_by_id(session, int(referral_code)) if referral_code is not None else None
+    first_join_ban = not settings.config.global_mode and not check_is_admin(tg_user.username)
     user_entity = UserEntity(user_id=tg_user.id,
                              user_name=tg_user.username,
                              first_name=tg_user.first_name,
                              language_code=tg_user.language_code,
-                             ban=not settings.config.global_mode and not check_is_admin(tg_user.username),
+                             ban=first_join_ban,
                              role=Role.DEFAULT,
                              joined_at=datetime.now())
+    user_entity.referred_by_link = ref_link
     user_entity.settings = UserSettingsEntity()
     user_entity.referral_link = ReferralLinkEntity()
     session.add(user_entity)

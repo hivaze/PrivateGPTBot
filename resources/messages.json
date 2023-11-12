@@ -269,6 +269,10 @@
     "ru": "Поддержки понимания картинок на данный момент нет, будет использоваться только текст.\nСкоро ассистент сможет понимать их содержимое, следите за обновлениями!",
     "en": "Image understanding is not supported at the moment, only text will be used.\nSoon the assistant will be able to understand their contents, stay tuned!"
   },
+  "feedback_answer": {
+    "ru": "<b>Привет, это ответ разработчиков на твое обращение</b>:\n\n{text}",
+    "ru": "<b>Hello, this is the developers' response to your feedback</b>:\n\n{text}"
+  },
   "confirmation": {
     "yes": {
       "ru": "Да",

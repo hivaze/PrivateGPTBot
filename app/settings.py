@@ -216,6 +216,7 @@ class MessagesConfig(BaseModel):
     tokens: Tokens
     price_list: PriceList
     image_upload: Dict[str, str]
+    feedback_answer: Dict[str, str]
     confirmation: Confirmation
 
 

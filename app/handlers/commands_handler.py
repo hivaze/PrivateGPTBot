@@ -9,12 +9,13 @@ from sqlalchemy.orm import Session
 
 from app import settings
 from app.bot import dp, tg_bot
-from app.database.entity_services.feedback_service import get_week_feedbacks
+from app.database.entity_services.feedback_service import get_week_feedbacks, get_feedback_by_id
 from app.database.sql_db_service import with_session, UserEntity, Role
 from app.database.entity_services.messages_service import get_all_messages, get_avg_hist_size_by_user, \
     get_avg_tokens_by_user, \
     get_avg_tokens_per_message, get_avg_messages_by_user
-from app.database.entity_services.tokens_packages_service import tokens_barrier, add_new_tokens_package, find_tokens_package
+from app.database.entity_services.tokens_packages_service import tokens_barrier, add_new_tokens_package, \
+    find_tokens_package
 from app.database.entity_services.users_service import access_check, check_is_admin, get_all_users, \
     get_user_by_id, set_ban_userid, get_users_with_filters
 from app.handlers.exceptions_handler import zero_exception
@@ -227,7 +228,8 @@ async def feedback_list(session: Session, user: UserEntity,
     for feedback in feedbacks:
         user = get_user_by_id(session, feedback.user_id)
         await message.answer(
-            f"Feedback from user '{user.user_id}' | '{user.user_name}' at {feedback.created_at.strftime('%Y-%m-%d %H:%M')}:\n\n{feedback.text}")
+            f"Feedback '{feedback.id}' from user '{user.user_id}' | '{user.user_name}' "
+            f"at {feedback.created_at.strftime('%Y-%m-%d %H:%M')}:\n\n{feedback.text}")
 
 
 @dp.message_handler(commands=["feedback_answer", "fba"], state='*')
@@ -241,10 +243,25 @@ async def feedback_answer(session: Session, user: UserEntity,
         return
 
     arguments = message.text.split(' ')
-    if len(arguments) == 0:
+    if len(arguments) <= 2:
         await message.answer("Usage: /feedback_answer {feedback_id} {text}")
+        return
 
-    # TODO
+    feedback = get_feedback_by_id(session, int(arguments[1]))
+    if feedback is None:
+        await message.answer(f'Feedback {arguments[1]} does not exist')
+        return
+
+    if len(arguments[2].strip()) < 3:
+        await message.answer('Feedback answer is too short')
+        return
+
+    other_user = get_user_by_id(session, feedback.user_id)
+    lc = format_language_code(other_user.language_code)
+    await tg_bot.send_message(chat_id=feedback.user_id,
+                              text=settings.messages.feedback_answer[lc].format(text=arguments[2].strip()),
+                              parse_mode='HTML')
+    await message.answer(f"Feedback sent to user '{other_user.user_id}' | '{other_user.user_name}'")
 
 
 @dp.message_handler(commands=["send_message", "sm"], state=UserState.menu)
