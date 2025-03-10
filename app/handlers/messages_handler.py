@@ -331,8 +331,8 @@ async def communication_answer(session: Session, user: UserEntity,
         if left_tokens / tokens_package_config.tokens < 0.1 and left_tokens > 0 and not settings.config.free_mode:
             await message.answer(settings.messages.tokens.running_out[lc])
 
-        # Remove functions responses to save tokens
-        history.remove_function_responses()
+        # Remove functions responses to save tokens (not using)
+        # history.remove_function_responses()
 
         # Update user state with new history
         await state.update_data({"history": history})

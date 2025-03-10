@@ -26,7 +26,7 @@ def website_request(user: UserEntity, current_user_data: dict, url: str):
         docs = html2text.transform_documents(docs)
         docs = [clean_text(doc.page_content) for doc in docs]
         total_symbols = sum([len(doc) for doc in docs])
-        if total_symbols > 50_000:
+        if total_symbols > 60_000:
             return ("ERROR: The content of this website is too long for the assistant."
                     " The assistant only works with short and medium-length pages (for example, news pages)")
     except Exception as e:
@@ -78,4 +78,4 @@ def execute_function_call(user: UserEntity,
     logger.info(f"Calling function '{func_name}' with args '{message.arguments}' for user '{user.user_id}'")
     results = FUNCTIONS_MAPPING[func_name](user, current_user_data, **message.arguments)
 
-    return FunctionResponseMessage(name=func_name, text=json.dumps(results, ensure_ascii=False))
+    return FunctionResponseMessage(tool_call_id=message.tool_call_id, text=json.dumps(results, ensure_ascii=False))

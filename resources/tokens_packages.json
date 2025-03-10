@@ -15,7 +15,7 @@
     "superior_model": false,
     "use_functions": false,
     "use_superior_as_default": false,
-    "tokens": 60000,
+    "tokens": 80000,
     "price": 0,
     "duration": "7d"
   },

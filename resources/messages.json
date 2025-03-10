@@ -1,8 +1,8 @@
 {
   "welcome": {
     "with_access": {
-      "ru": "Привет, это твой очень умный и <b>персонализированный AI-ассистент</b>.\nВ моей основе лежат несколько нейросетей, включая ChatGPT от OpenAI.\n\nЯ не занимаюсь какой-либо рекламой, я частично <b>бесплатный</b> для всей аудитории!\n\n<b>Что я могу для всех пользователей</b>:\n- Использую GPT-3.5 для ответов\n- Умею общаться на любые темы, решать любые, хорошо сформулированные проблемы\n- Понимаю пересылаемые сообщения из каналов и чатов\n- Умею создавать кастомных персонажей для тебя\n- Умею понимать картинки (но не генерировать)\n- Умею перегенерировать сообщения\n\n<b>Что я могу для пользователей с расширенным доступом</b>:\n- Умею понимать в 4 раза больше информации\n- Умею использовать GPT-4\n- Умею работать с любым количеством документов (pdf, doc, ppt и т.д.) одновременно, могу рассказать и ответь на вопросы о содержании\n- Умею работать с многими веб-сайтами и искать информацию в интернете\n\nДля общения со мной просто выбери одного из персонажей или создай своего. Все твои сообщения не сохраняются, их никто не увидит!\n\nЧтобы стать пользователем с расширенным доступом, заполни анкету:\nhttps://docs.google.com/forms/d/1pf9DMJM0wHK-hUFxtekCtKtBiXVYCcjAZa5tJJk-HOQ",
-      "en": "Hello, this is your very smart and <b>personalized AI-assistant</b>.\nI am based on several neural networks, including ChatGPT by OpenAI.\n\nI don't do ads and I am partially <b>free</b> for everyone!\n\n<b>What can I do for all users</b>:\n- I use GPT-3.5 for answers\n- I can discuss any topic and solve any well-formulated problems\n- I understand forwarded messages from channels and chats and can summarize them\n- I can create custom characters tailored to your preferences\n- I can interpret images (though I can't generate them)\n- I can regenerate messages\n\n<b>And for users with extended access, I offer even more:</b>:\n- I can understand four times more information\n- I can utilize the advanced capabilities of GPT-4\n- I can handle any number of documents (pdf, doc, ppt, etc) simulatenously, I can summarize them and answer questions about their content\n- I can work with many websites and search for information on the Internet\n\nTo chat with me, choose a character or create your own. Your messages are not saved and remain private.\n\nWant to enjoy the benefits of extended access? Apply for an upgrade here:\nhttps://docs.google.com/forms/d/1o5msFS19oyoRF9XEXysohVtP5cG8vUeu9WZoSgahpYo"
+      "ru": "Привет, это твой очень умный и <b>персонализированный AI-ассистент</b>.\nВ моей основе лежат несколько нейросетей, включая ChatGPT от OpenAI.\n\nЯ не занимаюсь какой-либо рекламой, я частично <b>бесплатный</b> для всей аудитории!\n\n<b>Что я могу для всех пользователей</b>:\n- Использую GPT-4o-mini для ответов\n- Умею общаться на любые темы, решать любые, хорошо сформулированные проблемы\n- Понимаю пересылаемые сообщения из каналов и чатов\n- Умею создавать кастомных персонажей для тебя\n- Умею понимать картинки (но не генерировать)\n- Умею перегенерировать сообщения\n\n<b>Что я могу для пользователей с расширенным доступом</b>:\n- Умею понимать в 4 раза больше информации\n- Умею использовать o3-mini\n- Умею работать с любым количеством документов (pdf, doc, ppt и т.д.) одновременно, могу рассказать и ответь на вопросы о содержании\n- Умею работать с многими веб-сайтами и искать информацию в интернете\n\nДля общения со мной просто выбери одного из персонажей или создай своего. Все твои сообщения не сохраняются, их никто не увидит!\n\nЧтобы стать пользователем с расширенным доступом, заполни анкету:\nhttps://docs.google.com/forms/d/1pf9DMJM0wHK-hUFxtekCtKtBiXVYCcjAZa5tJJk-HOQ",
+      "en": "Hello, this is your very smart and <b>personalized AI-assistant</b>.\nI am based on several neural networks, including ChatGPT by OpenAI.\n\nI don't do ads and I am partially <b>free</b> for everyone!\n\n<b>What can I do for all users</b>:\n- I use GPT-4o-mini for answers\n- I can discuss any topic and solve any well-formulated problems\n- I understand forwarded messages from channels and chats and can summarize them\n- I can create custom characters tailored to your preferences\n- I can interpret images (though I can't generate them)\n- I can regenerate messages\n\n<b>And for users with extended access, I offer even more:</b>:\n- I can understand four times more information\n- I can utilize the advanced capabilities of o3-mini\n- I can handle any number of documents (pdf, doc, ppt, etc) simulatenously, I can summarize them and answer questions about their content\n- I can work with many websites and search for information on the Internet\n\nTo chat with me, choose a character or create your own. Your messages are not saved and remain private.\n\nWant to enjoy the benefits of extended access? Apply for an upgrade here:\nhttps://docs.google.com/forms/d/1o5msFS19oyoRF9XEXysohVtP5cG8vUeu9WZoSgahpYo"
     },
     "no_access": {
       "ru": "К сожалению, тебе нельзя пользоваться этим ботом. Сейчас ассистент закрыт для новых пользователей, но мы тебя уведомим, когда ты сможешь присоединиться. :(",
@@ -132,12 +132,12 @@
     },
     "use_superior_by_default": {
       "turn_on": {
-        "ru": "Использовать GPT-4 по умолчанию",
-        "en": "Use GPT-4 by default"
+        "ru": "Использовать o3-mini по умолчанию",
+        "en": "Use o3-mini by default"
       },
       "turn_off": {
-        "ru": "Не использовать GPT-4 по умолчанию",
-        "en": "Do not use GPT-4 by default"
+        "ru": "Не использовать o3-mini по умолчанию",
+        "en": "Do not use o3-mini by default"
       }
     }
   },
@@ -189,8 +189,8 @@
       "en": "Redo"
     },
     "superior": {
-      "ru": "Переделать с GPT-4",
-      "en": "Redo with GPT-4"
+      "ru": "Переделать с o3-mini",
+      "en": "Redo with o3-mini"
     },
     "not_allowed": {
       "ru": "Вам недоступна эта модель, подайте заявку на получение расширенного доступа",
@@ -202,8 +202,8 @@
         "en": "A new response to this message is being generated..."
       },
       "superior": {
-        "ru": "Генерируется новый вариант ответа на это сообщение c GPT-4...",
-        "en": "A new response to this message is being generated with GPT-4..."
+        "ru": "Генерируется новый вариант ответа на это сообщение c o3-mini...",
+        "en": "A new response to this message is being generated with o3-mini..."
       }
     },
     "error": {
