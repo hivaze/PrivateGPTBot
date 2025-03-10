@@ -19,11 +19,12 @@ class ChatMessage:
 
 @dataclass
 class FunctionResponseMessage(ChatMessage):
-    name: str = None
+    tool_call_id: str = None
 
 
 @dataclass
 class FunctionCallMessage(ChatMessage):
+    tool_call_id: str = None
     name: str = None
     arguments: dict = None
 
@@ -43,7 +44,7 @@ class ChatHistory:
             last_message = self._chat_history.pop()
 
     def remove_function_responses(self):
-        self._chat_history = list(filter(lambda x: not isinstance(x, FunctionResponseMessage), self._chat_history))
+        self._chat_history = list(filter(lambda x: not isinstance(x, FunctionResponseMessage) and not isinstance(x, FunctionCallMessage), self._chat_history))
 
     @property
     def chat_history(self):

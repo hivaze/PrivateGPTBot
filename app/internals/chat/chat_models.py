@@ -38,6 +38,7 @@ class BaseChatModel(ABC):
     def __init__(self, config: ModelConfig):
         self.config = config
         tokens_field = 'max_tokens' if 'max_tokens' in self.config.generation_params.keys() else 'max_new_tokens'
+        tokens_field = 'max_completion_tokens' if 'max_completion_tokens' in self.config.generation_params.keys() else tokens_field
         self.max_gen_tokens = self.config.generation_params.get(tokens_field, 856)
 
     @abstractmethod
@@ -76,9 +77,11 @@ class BaseChatModel(ABC):
             if len(chat_history) > 1 and type(chat_history[-1]) is not FunctionResponseMessage:
                 dropped_message = chat_history.pop(0)
                 tokens_to_remove -= self.count_tokens(dropped_message)
+                if type(dropped_message) is FunctionCallMessage and len(chat_history) > 0:
+                    dropped_message = chat_history.pop(0)  # remove following FunctionResponseMessage
+                    tokens_to_remove -= self.count_tokens(dropped_message)
             else:
                 tokens = self.tokenize_sentence(chat_history[-1].text)
-                print(tokens_to_remove, tokens_to_remove / len(tokens))
                 new_tokens = percent_trim_list(tokens, percent=min(tokens_to_remove / len(tokens), 0.05))
                 tokens_to_remove -= len(tokens) - len(new_tokens)
                 # tokens_to_remove -= (len(tokens) - len(new_tokens))
@@ -118,7 +121,7 @@ class OpenAIChatModel(BaseChatModel):
         ChatRole.SYSTEM: 'system',
         ChatRole.USER: 'user',
         ChatRole.ASSISTANT: 'assistant',
-        ChatRole.FUNCTION: 'function'
+        ChatRole.FUNCTION: 'tool'
     }
     TEXT_ROLES_MAPPING = {v: k for k, v in ROLES_TEXT_MAPPING.items()}
 
@@ -142,14 +145,14 @@ class OpenAIChatModel(BaseChatModel):
                 arguments_tokens += self._count_str_tokens(v)
             return self._count_str_tokens(message.name) + arguments_tokens
         elif type(message) == FunctionResponseMessage:
-            return self._count_str_tokens(message.name) + self._count_str_tokens(message.text)
+            return self._count_str_tokens(message.text)
 
     def count_functions_prompt_tokens(self, functions: list) -> int:
         functions_tokens = 0
         for function in functions:
-            functions_tokens += self._count_str_tokens(function['name'])
-            functions_tokens += self._count_str_tokens(function['description'])
-            for k, v in function['parameters']['properties'].items():
+            functions_tokens += self._count_str_tokens(function['function']['name'])
+            functions_tokens += self._count_str_tokens(function['function']['description'])
+            for k, v in function['function']['parameters']['properties'].items():
                 functions_tokens += self._count_str_tokens(k)
                 functions_tokens += self._count_str_tokens(v['description'])
         return functions_tokens
@@ -171,12 +174,11 @@ class OpenAIChatModel(BaseChatModel):
         if isinstance(message, FunctionResponseMessage):
             return {"role": self.ROLES_TEXT_MAPPING[ChatRole.FUNCTION],
                     "content": message.text,
-                    "name": message.name}
+                    "tool_call_id": message.tool_call_id}
         elif isinstance(message, FunctionCallMessage):
             return {"role": self.ROLES_TEXT_MAPPING[ChatRole.ASSISTANT],
                     "content": None,
-                    "function_call": {"name": message.name, "arguments": json.dumps(message.arguments,
-                                                                                    ensure_ascii=False)}}
+                    "tool_calls": [{"id": message.tool_call_id, "type": "function", "function": {"name": message.name, "arguments": json.dumps(message.arguments, ensure_ascii=False)}}]}
         else:
             return {"role": self.ROLES_TEXT_MAPPING[message.role],
                     "content": message.text}
@@ -192,12 +194,13 @@ class OpenAIChatModel(BaseChatModel):
         ]
 
     def _is_function_call(self, message_container) -> bool:
-        return message_container.get("function_call") is not None
+        return message_container.get("tool_calls") is not None
 
     def _parse_output(self, message_container, is_function_call: bool) -> ChatMessage:
         if is_function_call:
-            return FunctionCallMessage(name=message_container['function_call']['name'],
-                                       arguments=json.loads(message_container['function_call']['arguments']))
+            return FunctionCallMessage(tool_call_id=message_container['tool_calls'][0]['id'],
+                                       name=message_container['tool_calls'][0]['function']['name'],
+                                       arguments=json.loads(message_container['tool_calls'][0]['function']['arguments']))
         return ChatMessage(role=self.TEXT_ROLES_MAPPING[message_container['role']], text=message_container['content'])
 
     def _generate_answer(self, formatted_history, functions, function_call) -> TextGenerationResult:
@@ -207,8 +210,8 @@ class OpenAIChatModel(BaseChatModel):
                 if functions is not None and len(functions) > 0:  # openai.error.InvalidRequestError fix
                     response: OpenAIObject = openai.ChatCompletion.create(messages=formatted_history,
                                                                           model=self.config.model_name,
-                                                                          functions=functions,
-                                                                          function_call=function_call,
+                                                                          tools=functions,
+                                                                          tool_choice=function_call,
                                                                           **self.config.generation_params)
                 else:
                     response: OpenAIObject = openai.ChatCompletion.create(messages=formatted_history,

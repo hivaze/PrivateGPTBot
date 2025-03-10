@@ -18,6 +18,8 @@ FORWARD_MESSAGE_FORMAT = "Forwarded message from {user_name}: {message}"
 DEFAULT_MESSAGE_FORMAT = "{message}"
 DOCUMENTS_DESCRIPTION_PROMPT = "\nDescription of documents provided by user: \n{documents_desc}"
 
+MAX_MESSAGE_LENGTH = 4096
+
 
 class TypingBlock(object):
 
@@ -238,22 +240,37 @@ async def clean_last_message_markup(user: UserEntity, last_message: MessageEntit
     except Exception:
         pass
 
-
 async def send_response_message(user: UserEntity,
                                 user_message: Message,
                                 bot_message: str,
                                 do_reply: bool,
                                 add_redo=True) -> Message:
-    markup = build_message_markup(user, last_message=None, with_redo=add_redo)
-    if do_reply:
-        try:
-            sent_message = await user_message.reply(bot_message, reply_markup=markup)
-        except BadRequest:  # Fix for 'Replied message not found'
-            sent_message = await user_message.answer(bot_message, reply_markup=markup)
-    else:
-        sent_message = await user_message.answer(bot_message, reply_markup=markup)
-    return sent_message
+    # Разбиваем сообщение на части, если оно превышает максимальную длину
+    message_parts = split_message(bot_message, MAX_MESSAGE_LENGTH)
+    
+    # Создаем клавиатуру только для последнего сообщения
+    markup = build_message_markup(user, last_message=None, with_redo=add_redo) if add_redo else None
+    
+    sent_messages = []
+    for i, part in enumerate(message_parts):
+        # Применяем Markdown форматирование только к последнему сообщению, если есть клавиатура
+        parse_mode = 'Markdown' if (i == len(message_parts) - 1 and markup) else None
+        
+        if do_reply and i == 0:
+            try:
+                sent_message = await user_message.reply(part, reply_markup=markup if i == len(message_parts) - 1 else None, parse_mode=parse_mode)
+            except BadRequest:  # Fix for 'Replied message not found'
+                sent_message = await user_message.answer(part, reply_markup=markup if i == len(message_parts) - 1 else None, parse_mode=parse_mode)
+        else:
+            sent_message = await user_message.answer(part, reply_markup=markup if i == len(message_parts) - 1 else None, parse_mode=parse_mode)
+        
+        sent_messages.append(sent_message)
+    
+    return sent_messages[-1]  # Возвращаем последнее отправленное сообщение
 
+def split_message(message: str, max_length: int) -> list[str]:
+    # Разбиваем сообщение на части, не превышающие max_length
+    return [message[i:i + max_length] for i in range(0, len(message), max_length)]
 
 def build_menu_markup(language_code: str) -> types.ReplyKeyboardMarkup:
     markup = [types.KeyboardButton(v.name[language_code])
